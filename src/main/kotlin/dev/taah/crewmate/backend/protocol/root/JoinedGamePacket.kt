@@ -36,8 +36,8 @@ class JoinedGamePacket(nonce: Int) : AbstractPacket<JoinedGamePacket>(0x01, nonc
     }
 
     override fun deserialize(buffer: PacketBuffer) {
-        println("Game Code Join: ${GameCode(buffer.readInt32()).codeString}")
-        println("Crossplay Flags: ${buffer.readBoolean()}")
+//        println("Game Code Join: ${GameCode(buffer.readInt32()).codeString}")
+//        println("Crossplay Flags: ${buffer.readBoolean()}")
     }
 
 }

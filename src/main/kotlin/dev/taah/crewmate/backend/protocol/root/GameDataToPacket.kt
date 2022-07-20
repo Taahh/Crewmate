@@ -20,13 +20,11 @@ class GameDataToPacket(nonce: Int) : AbstractPacket<GameDataToPacket>(0x01, nonc
     override fun processPacket(packet: GameDataToPacket, connection: PlayerConnection) {
 //        connection.sendReliablePacket(packet)
         if (gameCode != null) {
-            println("GAME ROOM EXISTS? ${GameRoom.exists(gameCode!!)}")
             if (GameRoom.exists(gameCode!!)) {
                 var room = GameRoom.get(gameCode!!)
                 room.players[packet.target]!!.sendReliablePacket(packet)
             }
         }
-        println("GAME DATA CODE: ${gameCode!!.codeString}")
     }
 
     override fun serialize(buffer: PacketBuffer) {
@@ -42,7 +40,6 @@ class GameDataToPacket(nonce: Int) : AbstractPacket<GameDataToPacket>(0x01, nonc
         this.gameCode = GameCode(buffer.readInt32())
         this.target = buffer.readPackedInt32();
         this.buffer = buffer.copyPacketBuffer()
-        println("GAME DATA TO: ${ByteBufUtil.prettyHexDump(buffer)}")
     }
 
 }

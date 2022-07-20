@@ -55,10 +55,10 @@ open class ReliablePacket(nonce: Int) :
         this.nonce = buffer.readUnsignedShort()
         val hazel = HazelMessage.read(buffer)!!
         if (RELIABLE_PACKETS.containsKey(hazel.getTag().toByte())) {
-            println("Deserializing Reliable Packet with tag ${hazel.getTag()}")
+//            println("Deserializing Reliable Packet with tag ${hazel.getTag()}")
             this.payload = hazel
         } else {
-            println("Unknown Reliable Packet with tag ${hazel.getTag()}")
+//            println("Unknown Reliable Packet with tag ${hazel.getTag()}")
         }
     }
 

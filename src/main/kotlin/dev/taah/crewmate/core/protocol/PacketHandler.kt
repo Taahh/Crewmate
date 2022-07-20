@@ -27,19 +27,19 @@ class PacketHandler : SimpleChannelInboundHandler<ByteBuf>() {
             CrewmateServer.CONNECTIONS[ctx.channel().remoteAddress() as InetSocketAddress] = connection
         }
         val buffer = PacketBuffer(msg!!)
-        println(ByteBufUtil.prettyHexDump(buffer))
+//        println(ByteBufUtil.prettyHexDump(buffer))
         val tag: Byte = buffer.readByte()
         val packet = CrewmateServer.HANDLER.getPacket<AbstractPacket<*>>(tag)
 
-        System.out.printf(
+        /*System.out.printf(
             "Received packet from user %s with packet ID %s, and length %s%n",
             connection.clientName,
 //            nonce,
             tag,
             buffer.readableBytes()
-        )
+        )*/
         if (packet != null) {
-            System.out.printf("Deserializing packet %s%n", packet.javaClass.simpleName)
+//            System.out.printf("Deserializing packet %s%n", packet.javaClass.simpleName)
             packet.deserialize(buffer)
             packet.processPacket(packet, connection)
         }

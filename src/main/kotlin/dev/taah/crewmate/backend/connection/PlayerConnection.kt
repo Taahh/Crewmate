@@ -10,6 +10,7 @@ import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
+import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
@@ -45,7 +46,6 @@ class PlayerConnection(
         packet.serialize(buffer)
         channel.channel().writeAndFlush(buffer.copyPacketBuffer().retain()).addListener {
             ChannelFutureListener { future ->
-                println("operation completed!")
                 if (future.isSuccess) {
                     channel.channel().read()
                 } else {
@@ -53,18 +53,13 @@ class PlayerConnection(
                 }
             }
         }
-        println(
-            "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName} and buffer ${
-                ByteBufUtil.prettyHexDump(
-                    buffer
-                )
-            }"
+        CrewmateServer.LOGGER!!.debug(
+            "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName}"
         )
     }
 
     override fun sendReliablePacket(packet: AbstractPacket<*>) {
         val nonce = this.getNextNonce()
-        println("UPDATED NONCE FOR ${this.clientName} TO $nonce")
         sendPacket(packet, nonce)
     }
 

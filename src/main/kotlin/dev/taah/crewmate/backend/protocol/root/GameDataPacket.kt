@@ -17,23 +17,18 @@ class GameDataPacket(nonce: Int) : AbstractPacket<GameDataPacket>(0x01, nonce) {
     var buffer: PacketBuffer? = null
 
     override fun processPacket(packet: GameDataPacket, connection: PlayerConnection) {
-//        connection.sendReliablePacket(packet)
         if (gameCode != null) {
-            println("GAME ROOM EXISTS? ${GameRoom.exists(gameCode!!)}")
             if (GameRoom.exists(gameCode!!)) {
                 var room = GameRoom.get(gameCode!!)
                 var id = room.players.entries.filter { entry -> entry.value.uniqueId.equals(connection.uniqueId) }.map { mutableEntry -> mutableEntry.key }.first()
                 room.broadcastReliablePacket(packet, id)
             }
         }
-        println("GAME DATA CODE: ${gameCode!!.codeString}")
     }
 
     override fun serialize(buffer: PacketBuffer) {
         val hazel = HazelMessage.start(0x05)
         hazel.payload!!.writeInt32(this.gameCode!!.codeInt)
-        println("WRITING GAME DATA BUFFER")
-        println("BUFFER: ${ByteBufUtil.prettyHexDump(this.buffer!!)}")
         hazel.payload!!.writeBytes(this.buffer!!.copyPacketBuffer())
         hazel.endMessage()
         hazel.copyTo(buffer)
@@ -42,7 +37,6 @@ class GameDataPacket(nonce: Int) : AbstractPacket<GameDataPacket>(0x01, nonce) {
     override fun deserialize(buffer: PacketBuffer) {
         this.gameCode = GameCode(buffer.readInt32())
         this.buffer = buffer.copyPacketBuffer()
-        println("GAME DATA: ${ByteBufUtil.prettyHexDump(buffer)}")
     }
 
 }

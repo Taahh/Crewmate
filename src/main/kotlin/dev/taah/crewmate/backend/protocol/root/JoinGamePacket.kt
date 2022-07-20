@@ -86,8 +86,7 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
             }
         }
         room.players[id] = connection
-        println("Players: ")
-        println("Assigning ID $id to ${connection.clientName}")
+        CrewmateServer.LOGGER.info("[Room ${room.gameCode.codeString}] Assigning player ID $id to ${connection.clientName}")
 
         val packet = JoinedGamePacket(this.nonce)
         packet.joining = id
@@ -98,8 +97,6 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
         joinGamePacket.gameRoom = room
 
         connection.gameCode = gameCode
-
-        println("room b4: ${CrewmateServer.GSON.toJson(room)}")
 
         if (room.host != id) {
             room.broadcastReliablePacket(joinGamePacket, id)
@@ -126,7 +123,8 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
 
     override fun deserialize(buffer: PacketBuffer) {
         this.gameCode = GameCode(buffer.readInt32())
-        println("Crossplay Flags: ${buffer.readBoolean()}")
+        buffer.readBoolean()
+//        println("Crossplay Flags: ${buffer.readBoolean()}")
     }
 
 }

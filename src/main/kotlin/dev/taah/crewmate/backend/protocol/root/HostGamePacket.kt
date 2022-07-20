@@ -18,19 +18,16 @@ class HostGamePacket(nonce: Int) : AbstractPacket<HostGamePacket>(0x01, nonce) {
     override fun serialize(buffer: PacketBuffer) {
         val hazel = HazelMessage.start(0x00)
         val gameCode = GameCode.generateCode()
-        println("Game Code Host: ${gameCode.codeString}")
         hazel.payload!!.writeInt32(gameCode.codeInt)
-        println("host buffer b4: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
 
         hazel.endMessage()
-        println("host buffer after: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
         hazel.copyTo(buffer)
     }
 
     override fun deserialize(buffer: PacketBuffer) {
         val gameOptionsData = GameOptionsData().deserialize(buffer)
-        println("Data: ${CrewmateServer.GSON.toJson(gameOptionsData)}")
-        println("Crossplay Flags: ${buffer.readInt32()}")
+        buffer.readInt32()
+//        println("Crossplay Flags: ${buffer.readInt32()}")
     }
 
 }
