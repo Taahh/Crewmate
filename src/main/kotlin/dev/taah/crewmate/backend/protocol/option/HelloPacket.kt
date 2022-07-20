@@ -1,5 +1,7 @@
 package dev.taah.crewmate.backend.protocol.option
 
+import dev.taah.crewmate.api.event.EventManager
+import dev.taah.crewmate.backend.event.connection.ConnectionDataEvent
 import dev.taah.crewmate.api.inner.enums.QuickChatMode
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.inner.data.PlatformData
@@ -21,6 +23,10 @@ class HelloPacket(nonce: Int) : AbstractPacket<HelloPacket>(0x08, nonce) {
         connection.chatModeType = packet.chatModeType!!
         connection.platformData = packet.platformData
         connection.sendAck(this.nonce)
+
+
+        EventManager.INSTANCE!!.callEvent(ConnectionDataEvent(connection))
+
         val reliable = ReliablePacket(connection.getNextNonce())
         reliable.reliablePacket = ReactorHandshakePacket(reliable.nonce) as AbstractPacket<ReliablePacket>?
         connection.sendReliablePacket(reliable)

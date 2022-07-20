@@ -32,6 +32,7 @@ open class ReliablePacket(nonce: Int) :
         this.registerPacket(0x06, GameDataToPacket::class as KClass<AbstractPacket<*>>)
         this.registerPacket(0x07, JoinedGamePacket::class as KClass<AbstractPacket<*>>)
         this.registerPacket(0x08, EndGamePacket::class as KClass<AbstractPacket<*>>)
+        this.registerPacket(10, AlterGamePacket::class as KClass<AbstractPacket<*>>)
     }
 
     override fun processPacket(packet: ReliablePacket, connection: PlayerConnection) {

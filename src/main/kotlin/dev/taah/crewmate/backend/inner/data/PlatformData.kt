@@ -15,8 +15,7 @@ class PlatformData : IPlatformData {
     }
 
     constructor()
-
-
+    
     override fun serialize(buffer: PacketBuffer) {
         val hazel = HazelMessage.start(this.platform.toInt());
         hazel.payload!!.writePackedString(this.platformName)

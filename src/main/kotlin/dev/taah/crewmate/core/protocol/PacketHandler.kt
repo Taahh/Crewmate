@@ -16,6 +16,10 @@ class PacketHandler : SimpleChannelInboundHandler<ByteBuf>() {
         val connection: PlayerConnection
 
         if (ctx!!.channel().hasAttr(PlayerConnection.CONNECTION_STRING)) {
+            if (ctx.channel().attr(PlayerConnection.CONNECTION_STRING).get() == null)
+            {
+                return
+            }
             connection = ctx.channel().attr(PlayerConnection.CONNECTION_STRING).get()
         } else {
             connection = PlayerConnection(ctx!!, UUID.randomUUID())

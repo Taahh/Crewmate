@@ -1,8 +1,10 @@
 package dev.taah.crewmate.backend.protocol.root
 
+import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.GameState
 import dev.taah.crewmate.backend.connection.PlayerConnection
+import dev.taah.crewmate.backend.event.connection.GameRoomJoinEvent
 import dev.taah.crewmate.backend.inner.game.GameOptionsData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
@@ -41,10 +43,11 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
                     connection.sendReliablePacket(packet)
                     room.state = GameState.NotStarted
                     for (x in room.waitingForHost.toList()) {
-                        val joinGamePacket = JoinedGamePacket(this.nonce)
-                        joinGamePacket.joining = x
-                        joinGamePacket.gameRoom = room
-                        room.players[x]!!.sendReliablePacket(joinGamePacket)
+                        val joinedGamePacket = JoinedGamePacket(this.nonce)
+                        joinedGamePacket.joining = x
+                        joinedGamePacket.gameRoom = room
+                        room.players[x]!!.sendReliablePacket(joinedGamePacket)
+                        EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))
                         room.waitingForHost.remove(x)
                     }
                 } else {
@@ -70,6 +73,7 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
                 joinedGamePacket.joining = player.key
                 joinedGamePacket.gameRoom = room
                 connection.sendReliablePacket(joinedGamePacket)
+                EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))
             }
             return
         }
@@ -101,6 +105,7 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
             room.broadcastReliablePacket(joinGamePacket, id)
         }
         connection.sendReliablePacket(packet)
+        EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))
     }
 
     override fun serialize(buffer: PacketBuffer) {

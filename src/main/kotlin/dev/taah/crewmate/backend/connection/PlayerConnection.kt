@@ -1,8 +1,10 @@
 package dev.taah.crewmate.backend.connection
 
 import dev.taah.crewmate.api.connection.IConnection
+import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.QuickChatMode
+import dev.taah.crewmate.backend.event.connection.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.inner.data.PlatformData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
@@ -51,7 +53,6 @@ class PlayerConnection(
                 }
             }
         }
-//        channel.fireChannelRead(buffer)
         println(
             "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName} and buffer ${
                 ByteBufUtil.prettyHexDump(
@@ -76,6 +77,7 @@ class PlayerConnection(
                    room.players.entries.filter { entry -> entry.value.uniqueId.equals(this.uniqueId) }.first()
                room.players.remove(player.key)
                this.gameCode = null
+               EventManager.INSTANCE!!.callEvent(GameRoomLeaveEvent(this, room))
                channel.channel().attr(CONNECTION_STRING).set(null)
            }
        }

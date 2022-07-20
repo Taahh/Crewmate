@@ -3,15 +3,12 @@ package dev.taah.crewmate.core.room
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import dev.taah.crewmate.api.inner.enums.GameState
+import dev.taah.crewmate.api.inner.enums.GameVisibility
 import dev.taah.crewmate.api.room.IRoom
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
 import dev.taah.crewmate.util.inner.GameCode
-import io.netty.buffer.ByteBufUtil
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>> {
     companion object {
@@ -29,6 +26,7 @@ class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>> {
     override var waitingForHost: ArrayList<Int> = Lists.newArrayList()
     override var host: Int = -1
     override var state: GameState = GameState.NotStarted
+    override var visibility: GameVisibility = GameVisibility.Private
     fun broadcastReliablePacket(packet: AbstractPacket<*>, vararg exclude: Int) {
         broadcastPacket(packet, true, *exclude)
     }
