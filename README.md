@@ -1,6 +1,5 @@
 # Crewmate [[Discord](https://discord.gg/r6b2xw7K47)]
 ## What is it?
----
 Crewmate is an implementation of Among Us's UDP Protocol made into a server to simulate the default given servers.
 
 ## To Do:
