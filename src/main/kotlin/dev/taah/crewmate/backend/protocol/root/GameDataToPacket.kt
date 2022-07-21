@@ -4,6 +4,7 @@ import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.inner.game.GameOptionsData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
+import dev.taah.crewmate.backend.util.inner.GameDataUtil
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
@@ -22,7 +23,7 @@ class GameDataToPacket(nonce: Int) : AbstractPacket<GameDataToPacket>(0x01, nonc
         if (gameCode != null) {
             if (GameRoom.exists(gameCode!!)) {
                 var room = GameRoom.get(gameCode!!)
-                room.players[packet.target]!!.sendReliablePacket(packet)
+                room.connections[packet.target]!!.sendReliablePacket(packet)
             }
         }
     }
@@ -40,6 +41,7 @@ class GameDataToPacket(nonce: Int) : AbstractPacket<GameDataToPacket>(0x01, nonc
         this.gameCode = GameCode(buffer.readInt32())
         this.target = buffer.readPackedInt32();
         this.buffer = buffer.copyPacketBuffer()
+        GameDataUtil.handleGameData(buffer, GameRoom.get(this.gameCode!!))
     }
 
 }

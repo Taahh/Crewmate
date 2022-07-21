@@ -3,7 +3,7 @@
 
     <!-- Logging Properties -->
     <Properties>
-        <Property name="LOG_PATTERN">%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green bold, DEBUG=magenta bold, TRACE=blue} [%.15t] %style{%C{}}{yellow}: %style{%m%}{bold}%n</Property>
+        <Property name="LOG_PATTERN">%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green bold, DEBUG=magenta bold, TRACE=blue} [%.15t] %style{%C{}}{yellow}: %style{%m}{bold}%n</Property>
         <Property name="APP_LOG_ROOT">c:/temp</Property>
     </Properties>
 

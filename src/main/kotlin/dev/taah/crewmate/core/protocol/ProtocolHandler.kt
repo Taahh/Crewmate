@@ -2,6 +2,7 @@ package dev.taah.crewmate.core.protocol
 
 import com.google.common.collect.Maps
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
 import dev.taah.crewmate.backend.protocol.option.HelloPacket
 import dev.taah.crewmate.backend.protocol.option.NormalPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
@@ -17,6 +18,7 @@ class ProtocolHandler {
         this.registerPacket(0x00, NormalPacket::class as KClass<AbstractPacket<*>>)
         this.registerPacket(0x08, HelloPacket::class as KClass<AbstractPacket<*>>)
         this.registerPacket(0x01, ReliablePacket::class as KClass<AbstractPacket<*>>)
+        this.registerPacket(0x09, DisconnectPacket::class as KClass<AbstractPacket<*>>)
     }
 
     fun registerPacket(id: Byte, clazz: KClass<AbstractPacket<*>>) {

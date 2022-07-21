@@ -6,6 +6,7 @@ import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.QuickChatMode
 import dev.taah.crewmate.backend.event.connection.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.inner.data.PlatformData
+import dev.taah.crewmate.backend.inner.data.PlayerInfo
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
@@ -28,10 +29,11 @@ class PlayerConnection(
 
     private var nonce = 0
 
-    var clientVersion: Int = 0
-    var chatModeType: QuickChatMode = QuickChatMode.QuickChatOnly
-    var platformData: PlatformData = PlatformData()
-    var gameCode: GameCode? = null
+    override var clientVersion: Int = 0
+    override var chatModeType: QuickChatMode = QuickChatMode.QuickChatOnly
+    override var platformData: PlatformData = PlatformData()
+    override var gameCode: GameCode? = null
+    override var playerInfo: PlayerInfo? = null
 
     companion object {
         val CONNECTION_STRING: AttributeKey<PlayerConnection> = AttributeKey.newInstance("player_conn")
@@ -69,13 +71,17 @@ class PlayerConnection(
            if (GameRoom.exists(this.gameCode!!)) {
                val room = GameRoom.get(this.gameCode!!)
                val player =
-                   room.players.entries.filter { entry -> entry.value.uniqueId.equals(this.uniqueId) }.first()
-               room.players.remove(player.key)
-               this.gameCode = null
+                   room.connections.entries.filter { entry -> entry.value.uniqueId.equals(this.uniqueId) }.first()
+               room.connections.remove(player.key)
                EventManager.INSTANCE!!.callEvent(GameRoomLeaveEvent(this, room))
-               channel.channel().attr(CONNECTION_STRING).set(null)
+               if (room.connections.isEmpty()) {
+                   CrewmateServer.LOGGER.info("Destroying room ${this.gameCode!!.codeString}")
+                   GameRoom.ROOMS.remove(GameRoom.ROOMS.entries.first { entry -> entry.key.equals(this.gameCode!!) }.key)
+               }
+               this.gameCode = null
            }
        }
+        channel.channel().attr(CONNECTION_STRING).set(null)
     }
 
     override fun sendDisconnect(disconnectReasons: DisconnectReasons, reason: String?) {

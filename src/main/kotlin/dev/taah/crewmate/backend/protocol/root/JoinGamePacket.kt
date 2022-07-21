@@ -33,8 +33,8 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
         if (room.state == GameState.InGame) {
             connection.sendDisconnect(DisconnectReasons.Custom, "Chris")
             return
-        } else if (room.players.values.any { it.uniqueId.equals(connection.uniqueId) }) {
-            val player = room.players.entries.filter { entry -> entry.value.uniqueId.equals(connection.uniqueId) }.first()
+        } else if (room.connections.values.any { it.uniqueId.equals(connection.uniqueId) }) {
+            val player = room.connections.entries.filter { entry -> entry.value.uniqueId.equals(connection.uniqueId) }.first()
             if (room.state == GameState.WaitingForHost) {
                 if (room.host == player.key) {
                     val packet = JoinedGamePacket(this.nonce)
@@ -46,7 +46,7 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
                         val joinedGamePacket = JoinedGamePacket(this.nonce)
                         joinedGamePacket.joining = x
                         joinedGamePacket.gameRoom = room
-                        room.players[x]!!.sendReliablePacket(joinedGamePacket)
+                        room.connections[x]!!.sendReliablePacket(joinedGamePacket)
                         EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))
                         room.waitingForHost.remove(x)
                     }
@@ -77,15 +77,15 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
             }
             return
         }
-        var id = room.players.size + 1
+        var id = room.connections.size + 1
         if (room.host == -1) {
-            if (room.players.isEmpty()) {
+            if (room.connections.isEmpty()) {
                 room.host = id
             } else {
-                room.host = room.players.keys.first()
+                room.host = room.connections.keys.first()
             }
         }
-        room.players[id] = connection
+        room.connections[id] = connection
         CrewmateServer.LOGGER.info("[Room ${room.gameCode.codeString}] Assigning player ID $id to ${connection.clientName}")
 
         val packet = JoinedGamePacket(this.nonce)
@@ -111,7 +111,7 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
         hazel.payload!!.writeInt32(this.joining)
         hazel.payload!!.writeInt32(this.gameRoom!!.host)
         val room = this.gameRoom!!
-        val player = room.players[joining]!!
+        val player = room.connections[joining]!!
         hazel.payload!!.writePackedString(player.clientName)
         player.platformData.serialize(hazel.payload!!)
         hazel.payload!!.writePackedInt32(0)

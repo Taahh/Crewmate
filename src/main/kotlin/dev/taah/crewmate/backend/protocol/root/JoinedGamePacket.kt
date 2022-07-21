@@ -22,8 +22,8 @@ class JoinedGamePacket(nonce: Int) : AbstractPacket<JoinedGamePacket>(0x01, nonc
         hazel.payload!!.writeInt32(gameRoom!!.gameCode.codeInt)
         hazel.payload!!.writeInt32(joining)
         hazel.payload!!.writeInt32(gameRoom!!.host)
-        hazel.payload!!.writePackedInt32(gameRoom!!.players.size - 1)
-        for ((k, v) in gameRoom!!.players.filter { entry -> entry.key != joining }) {
+        hazel.payload!!.writePackedInt32(gameRoom!!.connections.size - 1)
+        for ((k, v) in gameRoom!!.connections.filter { entry -> entry.key != joining }) {
             hazel.payload!!.writePackedInt32(k)
             hazel.payload!!.writePackedString(v.clientName)
             v.platformData.serialize(hazel.payload!!)
