@@ -1,9 +1,14 @@
 package dev.taah.crewmate.backend.protocol.option
 
 import dev.taah.crewmate.backend.connection.PlayerConnection
+import dev.taah.crewmate.backend.inner.objects.impl.GameData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.util.inner.GameDataUtil
 import dev.taah.crewmate.core.room.GameRoom
+import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
+import dev.taah.crewmate.util.inner.GameCode
+import io.netty.buffer.ByteBufUtil
 
 class NormalPacket(nonce: Int) : AbstractPacket<NormalPacket>(0x00, nonce) {
 
@@ -22,5 +27,10 @@ class NormalPacket(nonce: Int) : AbstractPacket<NormalPacket>(0x00, nonce) {
 
     override fun deserialize(buffer: PacketBuffer) {
         this.buffer = buffer.copyPacketBuffer()
+        val hazel = HazelMessage.read(buffer)!!
+        val gameCode = GameCode(hazel.payload!!.readInt32())
+//        println("game code: ${gameCode.codeString}")
+//        println("buffer: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
+        GameDataUtil.handleGameData(hazel.payload!!, GameRoom.get(gameCode))
     }
 }

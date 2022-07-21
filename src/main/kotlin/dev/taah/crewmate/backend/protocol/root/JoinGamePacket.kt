@@ -4,11 +4,8 @@ import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.GameState
 import dev.taah.crewmate.backend.connection.PlayerConnection
-import dev.taah.crewmate.backend.event.connection.GameRoomJoinEvent
-import dev.taah.crewmate.backend.inner.game.GameOptionsData
+import dev.taah.crewmate.backend.event.room.GameRoomJoinEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
-import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
-import dev.taah.crewmate.backend.protocol.option.ReliablePacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage

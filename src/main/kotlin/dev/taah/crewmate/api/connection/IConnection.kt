@@ -4,6 +4,7 @@ import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.QuickChatMode
 import dev.taah.crewmate.backend.inner.data.PlatformData
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
+import dev.taah.crewmate.backend.inner.objects.impl.PlayerControl
 import dev.taah.crewmate.util.inner.GameCode
 import java.util.*
 

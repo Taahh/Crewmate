@@ -10,6 +10,7 @@ import dev.taah.crewmate.api.room.IRoom
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
+import dev.taah.crewmate.backend.inner.objects.impl.GameData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
 import dev.taah.crewmate.util.inner.GameCode
@@ -26,19 +27,24 @@ class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>, Playe
         }
     }
 
-    override val players: HashMap<Byte, PlayerInfo> = Maps.newHashMap()
     override var connections: HashMap<Int, PlayerConnection> = Maps.newHashMap()
     override val spawnedObjects: HashMap<Int, AbstractInnerNetObject> = Maps.newHashMap()
     override var waitingForHost: ArrayList<Int> = Lists.newArrayList()
     override var host: Int = -1
     override var state: GameState = GameState.NotStarted
     override var visibility: GameVisibility = GameVisibility.Private
+    var gameData: GameData? = null
+        get() {
+            return this.spawnedObjects.values.find { inner -> inner.isGameData() } as GameData?
+        }
+        private set
+
     override fun getConnectionByClientId(id: Int): PlayerConnection? {
         return connections[id]
     }
 
     override fun getConnectionByPlayerId(id: Byte): PlayerConnection? {
-        return connections.values.find { it.playerInfo != null && it.playerInfo!!.playerId == id }
+        return connections.values.find { it.playerControl != null && it.playerControl!!.playerId == id }
     }
 
     fun broadcastReliablePacket(packet: AbstractPacket<*>, vararg exclude: Int) {

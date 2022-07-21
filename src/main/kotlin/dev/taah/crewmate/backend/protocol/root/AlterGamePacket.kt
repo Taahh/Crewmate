@@ -1,19 +1,14 @@
 package dev.taah.crewmate.backend.protocol.root
 
 import dev.taah.crewmate.api.event.EventManager
-import dev.taah.crewmate.api.inner.enums.GameState
 import dev.taah.crewmate.api.inner.enums.GameVisibility
 import dev.taah.crewmate.backend.connection.PlayerConnection
-import dev.taah.crewmate.backend.event.connection.GameRoomVisibilityUpdateEvent
-import dev.taah.crewmate.backend.inner.game.GameOptionsData
+import dev.taah.crewmate.backend.event.room.GameRoomVisibilityUpdateEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
-import dev.taah.crewmate.backend.protocol.option.ReliablePacket
-import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
-import io.netty.buffer.ByteBufUtil
 
 class AlterGamePacket(nonce: Int) : AbstractPacket<AlterGamePacket>(0x01, nonce) {
     var gameCode: GameCode? = null

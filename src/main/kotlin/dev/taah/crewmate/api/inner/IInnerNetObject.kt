@@ -8,10 +8,9 @@ import dev.taah.crewmate.backend.inner.data.PlayerInfo
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.util.PacketBuffer
 
-interface IInnerNetObject<G: IRoom<*, *, *>> {
+interface IInnerNetObject<G: IRoom<*, *, *>> : ISerializable, IDeserializable<Unit> {
     val netId: Int
     val ownerId: Int
-    fun deserialize(buffer: PacketBuffer, room: G)
-    fun serialize(buffer: PacketBuffer)
+    var initialState: Boolean
     fun processObject(room: G)
 }

@@ -51,7 +51,7 @@ class PlayerInfo : IPlayerInfo {
             val type = PlayerOutfitType.getById(buffer.readByte().toInt())
             val outfit = PlayerOutfit()
             outfit.deserialize(buffer)
-            println("outfit: ${CrewmateServer.GSON.toJson(outfit)}")
+//            println("outfit: ${CrewmateServer.GSON.toJson(outfit)}")
             this.outfits[type!!] = outfit
         }
         this.level = buffer.readPackedUInt32().toInt()

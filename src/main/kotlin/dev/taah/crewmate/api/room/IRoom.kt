@@ -10,7 +10,6 @@ import dev.taah.crewmate.util.inner.GameCode
 
 interface IRoom<P, T: IConnection<*>, C: IPlayerInfo> {
     var gameCode: GameCode
-    val players: HashMap<Byte, C>
     var connections: HashMap<Int, T>
     val spawnedObjects: HashMap<Int, out IInnerNetObject<*>>
     var waitingForHost: ArrayList<Int>

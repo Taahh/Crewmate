@@ -3,7 +3,7 @@ package dev.taah.crewmate.backend.protocol.option
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.backend.connection.PlayerConnection
-import dev.taah.crewmate.backend.event.connection.GameRoomLeaveEvent
+import dev.taah.crewmate.backend.event.room.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom

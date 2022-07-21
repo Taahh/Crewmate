@@ -8,6 +8,8 @@ import dev.taah.crewmate.util.PacketBuffer
 
 class VoteBanSystem(override val netId: Int, override val ownerId: Int) : AbstractInnerNetObject() {
     val votes: HashMap<Int, Array<Int>> = Maps.newHashMap()
+    override var initialState: Boolean = false
+
     override fun processObject(room: GameRoom) {
         room.spawnedObjects[this.netId] = this
     }
@@ -16,7 +18,7 @@ class VoteBanSystem(override val netId: Int, override val ownerId: Int) : Abstra
 
     }
 
-    override fun deserialize(buffer: PacketBuffer, room: GameRoom) {
+    override fun deserialize(buffer: PacketBuffer) {
         val votes = buffer.readByte()
         for (i in 0 until votes) {
             val key = buffer.readInt32()

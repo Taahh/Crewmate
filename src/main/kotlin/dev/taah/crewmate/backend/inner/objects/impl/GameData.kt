@@ -1,14 +1,19 @@
 package dev.taah.crewmate.backend.inner.objects.impl
 
+import com.google.common.collect.Maps
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
-import io.netty.buffer.ByteBufUtil
 
 class GameData(override val netId: Int, override val ownerId: Int) : AbstractInnerNetObject() {
+    val players: HashMap<Byte, PlayerInfo> = Maps.newHashMap()
+    override var initialState: Boolean = false
     override fun processObject(room: GameRoom) {
+        for (x in players.values) {
+            room.getConnectionByPlayerId(x.playerId)!!.playerInfo = x
+        }
         room.spawnedObjects[this.netId] = this
     }
 
@@ -16,19 +21,20 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
         TODO("Not yet implemented")
     }
 
-    override fun deserialize(buffer: PacketBuffer, room: GameRoom) {
+    override fun deserialize(buffer: PacketBuffer) {
         while (buffer.readableBytes() > 0) {
             try {
                 val hazel = HazelMessage.read(buffer) ?: break
-                println("other buffer: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
-                var playerInfo = room.players[hazel.getTag().toByte()]
+//                println("other buffer: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
+                var playerInfo = players[hazel.getTag().toByte()]
                 if (playerInfo == null)
                 {
                     playerInfo = PlayerInfo()
                     playerInfo!!.playerId = hazel.getTag().toByte()
-                    println("player id: ${playerInfo!!.playerId}")
+//                    println("player id: ${playerInfo!!.playerId}")
                     playerInfo!!.deserialize(hazel.payload!!)
-                    room.players[hazel.getTag().toByte()] = playerInfo!!
+                    this.players[hazel.getTag().toByte()] = playerInfo!!
+                    println("players: ${players.size}")
                 } else {
                     playerInfo!!.deserialize(hazel.payload!!)
                 }

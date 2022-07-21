@@ -14,7 +14,7 @@ class FloatRange(val min: Float = 0f, val max: Float = 0f) {
         } else if (1.0 < value) {
             value = 1.0f
         }
-        return min + (max - min) * value
+        return min + ((max - min) * value)
     }
 
     /*

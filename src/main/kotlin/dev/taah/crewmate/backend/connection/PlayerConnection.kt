@@ -4,9 +4,10 @@ import dev.taah.crewmate.api.connection.IConnection
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.QuickChatMode
-import dev.taah.crewmate.backend.event.connection.GameRoomLeaveEvent
+import dev.taah.crewmate.backend.event.room.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.inner.data.PlatformData
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
+import dev.taah.crewmate.backend.inner.objects.impl.PlayerControl
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
@@ -15,7 +16,6 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
-import io.netty.buffer.ByteBufUtil
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.util.AttributeKey
@@ -34,6 +34,7 @@ class PlayerConnection(
     override var platformData: PlatformData = PlatformData()
     override var gameCode: GameCode? = null
     override var playerInfo: PlayerInfo? = null
+    var playerControl: PlayerControl? = null
 
     companion object {
         val CONNECTION_STRING: AttributeKey<PlayerConnection> = AttributeKey.newInstance("player_conn")
