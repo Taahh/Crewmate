@@ -9,6 +9,7 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
+import org.checkerframework.checker.guieffect.qual.UI
 import kotlin.reflect.full.primaryConstructor
 
 class GameDataUtil {
@@ -49,12 +50,57 @@ class GameDataUtil {
                             EventManager.INSTANCE!!.callEvent(GameRoomDataEvent(room, conn.playerControl!!.customNetworkTransform!!))
                         }
                     }
+                    2 -> {
+                        var key = hazel.payload!!.readPackedUInt32()
+                        var callID = hazel.payload!!.readByte()
+                        println("call ID $callID key $key")
+                    }
                     else -> {
                         CrewmateServer.LOGGER.warn("Unknown Game Data Flag: ${hazel.getTag()}")
                     }
                 }
                 hazel = HazelMessage.read(buffer)
             }
+        }
+
+        fun writeSpawnMessage(buffer: PacketBuffer, room: GameRoom, ownerId: Int, innerNetObjects: InnerNetObjects) {
+            val hazel = HazelMessage.start(0x04)
+            hazel.payload!!.writePackedUInt32(innerNetObjects.spawnId.toLong())
+            hazel.payload!!.writePackedInt32(ownerId)
+            hazel.payload!!.writeByte(if (innerNetObjects == InnerNetObjects.PLAYER_CONTROL) 1 else 0)
+            hazel.payload!!.writePackedInt32(innerNetObjects.objects.size)
+            if (innerNetObjects == InnerNetObjects.PLAYER_CONTROL) {
+                val playerControl = room.getConnectionByClientId(ownerId)
+                for (x in playerControl!!.getPlayerControlObjects()) {
+                    CrewmateServer.LOGGER.debug("Serializing ${x.javaClass.simpleName} in spawn message!")
+                    hazel.payload!!.writePackedUInt32(x.netId.toLong())
+                    val innerHazel = HazelMessage.start(0x01)
+                    x.initialState = true
+                    x.serialize(innerHazel.payload!!)
+                    x.initialState = false
+                    innerHazel.endMessage()
+                    innerHazel.copyTo(hazel.payload!!)
+                }
+            } else {
+                for (x in innerNetObjects.objects) {
+                    val obj = room.spawnedObjects.values.find { x.simpleName == it.javaClass.simpleName }
+                    if (obj == null) {
+                        CrewmateServer.LOGGER.error("Couldn't find spawned object of {${x.simpleName}")
+                        continue
+                    }
+                    CrewmateServer.LOGGER.debug("Serializing ${x.simpleName} in spawn message!")
+                    hazel.payload!!.writePackedUInt32(obj.netId.toLong())
+                    val innerHazel = HazelMessage.start(0x01)
+                    obj.initialState = true
+                    obj.serialize(innerHazel.payload!!)
+                    obj.initialState = false
+                    innerHazel.endMessage()
+                    innerHazel.copyTo(hazel.payload!!)
+                }
+            }
+
+            hazel.endMessage()
+            hazel.copyTo(buffer)
         }
 
         private fun handleSpawn(buffer: PacketBuffer, room: GameRoom) {
@@ -86,5 +132,6 @@ class GameDataUtil {
                 }
             }
         }
+
     }
 }

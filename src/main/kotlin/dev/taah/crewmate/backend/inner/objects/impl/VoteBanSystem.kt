@@ -11,11 +11,18 @@ class VoteBanSystem(override val netId: Int, override val ownerId: Int) : Abstra
     override var initialState: Boolean = false
 
     override fun processObject(room: GameRoom) {
+        this.initialState = false
         room.spawnedObjects[this.netId] = this
     }
 
     override fun serialize(buffer: PacketBuffer) {
-
+        buffer.writeByte(this.votes.size)
+        for ((k, v) in this.votes) {
+            buffer.writeInt32(k)
+            for (i in 0 until 3) {
+                buffer.writePackedInt32(v[i])
+            }
+        }
     }
 
     override fun deserialize(buffer: PacketBuffer) {

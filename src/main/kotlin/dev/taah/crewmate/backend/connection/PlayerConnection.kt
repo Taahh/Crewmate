@@ -7,19 +7,24 @@ import dev.taah.crewmate.api.inner.enums.QuickChatMode
 import dev.taah.crewmate.backend.event.room.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.inner.data.PlatformData
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
+import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.backend.inner.objects.impl.PlayerControl
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
+import dev.taah.crewmate.backend.protocol.root.GameDataToPacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
+import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
+import io.netty.buffer.ByteBufUtil
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.util.AttributeKey
 import java.util.*
+import java.util.function.Consumer
 
 class PlayerConnection(
     @Transient val channel: ChannelHandlerContext,
@@ -40,6 +45,10 @@ class PlayerConnection(
         val CONNECTION_STRING: AttributeKey<PlayerConnection> = AttributeKey.newInstance("player_conn")
     }
 
+    fun getPlayerControlObjects(): Array<AbstractInnerNetObject> {
+        return arrayOf(this.playerControl!!, this.playerControl!!.playerPhysics!!, this.playerControl!!.customNetworkTransform!!)
+    }
+
     override fun sendPacket(packet: AbstractPacket<*>, nonce: Int) {
         val buffer = PacketBuffer()
         buffer.writeByte(packet.packetType.toInt())
@@ -58,6 +67,72 @@ class PlayerConnection(
         }
         CrewmateServer.LOGGER!!.debug(
             "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName}"
+        )
+        if (packet is GameDataToPacket) {
+            CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
+        }
+    }
+
+    fun sendGameData(packet: GameDataToPacket, consumer: Consumer<PacketBuffer>? = null) {
+        val buffer = PacketBuffer()
+        buffer.writeByte(packet.packetType.toInt())
+        buffer.writeShort(this.getNextNonce())
+        if (consumer != null) {
+            packet.consumer = consumer
+        }
+        packet.target = GameRoom.get(this.gameCode!!).connections.entries.find { entry -> entry.value.uniqueId.equals(this.uniqueId) }!!.key
+        packet.gameCode = this.gameCode!!
+        packet.serialize(buffer)
+        channel.channel().writeAndFlush(buffer.copyPacketBuffer().retain()).addListener {
+            ChannelFutureListener { future ->
+                if (future.isSuccess) {
+                    channel.channel().read()
+                } else {
+                    future.channel().close()
+                }
+            }
+        }
+        CrewmateServer.LOGGER!!.debug(
+            "Sending packet to ${this.clientName}: GameDataToPacket with buffer ${ByteBufUtil.prettyHexDump(buffer)}"
+        )
+    }
+
+    fun startRPC(targetNetId: Int, callId: Byte, targetClientId: Int = -1): Pair<HazelMessage, HazelMessage> {
+        val hazel: HazelMessage
+        if (targetClientId < 0) {
+            hazel = HazelMessage.start(0x05)
+            hazel.payload!!.writeInt32(this.gameCode!!.codeInt)
+        } else {
+            hazel = HazelMessage.start(0x06)
+            hazel.payload!!.writeInt32(this.gameCode!!.codeInt)
+        }
+        val rpc = HazelMessage.start(0x02)
+        rpc.payload!!.writePackedUInt32(targetNetId.toLong())
+        rpc.payload!!.writeByte(callId.toInt())
+        return Pair(hazel, rpc)
+    }
+
+    fun endRPC(hazel: HazelMessage): PacketBuffer {
+        val buffer = PacketBuffer()
+        buffer.writeByte(0x01)
+        buffer.writeShort(this.getNextNonce())
+        hazel.endMessage()
+        hazel.copyTo(buffer)
+        return buffer
+    }
+
+    fun sendBuffer(buffer: PacketBuffer) {
+        channel.channel().writeAndFlush(buffer.copyPacketBuffer().retain()).addListener {
+            ChannelFutureListener { future ->
+                if (future.isSuccess) {
+                    channel.channel().read()
+                } else {
+                    future.channel().close()
+                }
+            }
+        }
+        CrewmateServer.LOGGER!!.debug(
+            "Sending buffer to ${this.clientName}"
         )
     }
 

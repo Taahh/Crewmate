@@ -9,6 +9,8 @@ import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
+import io.netty.buffer.ByteBufUtil
+import java.util.*
 
 class AlterGamePacket(nonce: Int) : AbstractPacket<AlterGamePacket>(0x01, nonce) {
     var gameCode: GameCode? = null
@@ -21,6 +23,18 @@ class AlterGamePacket(nonce: Int) : AbstractPacket<AlterGamePacket>(0x01, nonce)
                 room.visibility = visibility!!
                 EventManager.INSTANCE!!.callEvent(GameRoomVisibilityUpdateEvent(room, old, room.visibility))
                 room.broadcastReliablePacket(packet)
+
+                //RPC TEST
+               /* for (x in room.connections.keys) {
+                    val conn = room.connections[x]!!
+                    val (parent, rpc) = connection.startRPC(room.connections[room.host]!!.playerControl!!.netId, 0x06)
+                    rpc.payload!!.writePackedString("yo mama")
+                    rpc.endMessage()
+                    rpc.copyTo(parent.payload!!)
+                    val buffer = connection.endRPC(parent)
+                    println("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
+                    conn.sendBuffer(buffer)
+                }*/
             }
         }
     }

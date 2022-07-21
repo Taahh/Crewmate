@@ -14,14 +14,15 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
     var new: Boolean = false
     var playerId: Byte = 0
     override fun processObject(room: GameRoom) {
-//        println("player control: ${CrewmateServer.GSON.toJson(this)}")
-        room.connections[this.ownerId]!!.playerInfo = room.gameData!!.players[this.playerId]
-        println("set ${this.ownerId}'s player info and and player id to ${room.gameData!!.players[this.playerId]?.playerId}")
+        this.initialState = false
         room.connections[this.ownerId]!!.playerControl = this
     }
 
     override fun serialize(buffer: PacketBuffer) {
-        TODO("Not yet implemented")
+        if (this.initialState) {
+            buffer.writeBoolean(this.new)
+        }
+        buffer.writeByte(this.playerId.toInt())
     }
 
     override fun deserialize(buffer: PacketBuffer) {

@@ -15,11 +15,21 @@ class CustomNetworkTransform(override val netId: Int, override val ownerId: Int)
 
     override fun processObject(room: GameRoom) {
 //        println("cnt: ${CrewmateServer.GSON.toJson(this)}")
+        this.initialState = false
         room.connections[this.ownerId]!!.playerControl!!.customNetworkTransform = this
     }
 
     override fun serialize(buffer: PacketBuffer) {
-        TODO("Not yet implemented")
+        if (this.initialState) {
+            buffer.writeUInt16(this.lastSequenceId)
+            Vector2.writeVector2(buffer, this.position!!)
+            Vector2.writeVector2(buffer, this.velocity!!)
+            return
+        }
+        ++this.lastSequenceId
+        buffer.writeUInt16(this.lastSequenceId)
+        Vector2.writeVector2(buffer, this.position!!)
+        Vector2.writeVector2(buffer, this.velocity!!)
     }
 
     override fun deserialize(buffer: PacketBuffer) {
