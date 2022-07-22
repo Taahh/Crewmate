@@ -1,17 +1,10 @@
 package dev.taah.crewmate.backend.protocol.data
 
-import com.google.common.collect.Lists
-import com.google.common.collect.Maps
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.backend.event.room.GameRoomDataEvent
-import dev.taah.crewmate.backend.event.room.GameRoomSpawnEvent
-import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
-import dev.taah.crewmate.backend.inner.objects.InnerNetObjects
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
-import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
-import kotlin.reflect.full.primaryConstructor
 
 class DataMessage : AbstractMessage(0x01) {
 

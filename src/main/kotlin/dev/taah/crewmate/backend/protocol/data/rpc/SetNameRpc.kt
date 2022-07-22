@@ -6,9 +6,13 @@ import dev.taah.crewmate.backend.protocol.root.GameDataPacket
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class SetNameRpc : AbstractMessage(0x00) {
+class SetNameRpc() : AbstractMessage(0x00) {
 
     var name: String? = null
+
+    constructor(name: String) : this() {
+        this.name = name
+    }
 
     override fun processObject(room: GameRoom) {
     }

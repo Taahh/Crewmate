@@ -21,6 +21,11 @@ class GameDataPacket(nonce: Int = -1) : AbstractPacket<GameDataPacket>(0x01, non
 
     val messages: ArrayList<AbstractMessage> = Lists.newArrayList()
 
+    constructor(gameCode: GameCode, vararg messages: AbstractMessage): this() {
+        this.gameCode = gameCode
+        this.messages.addAll(messages.toList())
+    }
+
     override fun processPacket(packet: GameDataPacket, connection: PlayerConnection) {
         if (gameCode != null) {
             if (GameRoom.exists(gameCode!!)) {

@@ -3,7 +3,7 @@ package dev.taah.crewmate.backend.protocol.data.rpc
 import dev.taah.crewmate.backend.protocol.data.AbstractMessage
 import kotlin.reflect.KClass
 
-enum class RpcFlags(val id: Int, vararg objects: KClass<out AbstractMessage>) {
+enum class RpcFlags(val id: Int, val clazz: KClass<out AbstractMessage>? = null) {
     PlayAnimation(0),
     CompleteTask(1),
     SyncSettings(2, SyncSettingsRpc::class),
@@ -53,12 +53,6 @@ enum class RpcFlags(val id: Int, vararg objects: KClass<out AbstractMessage>) {
     CheckMurder(47),
     CheckProtect(48),
     AdjustEscapeTimer(49);
-
-    val objects: List<KClass<out AbstractMessage>>
-
-    init {
-        this.objects = objects.toList()
-    }
 
     companion object {
         fun getById(id: Int): RpcFlags? {

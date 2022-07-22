@@ -14,7 +14,7 @@ class SyncSettingsRpc : AbstractMessage(0x00) {
 
     override fun processObject(room: GameRoom) {
 //        room.gameOptionsData = this.gameOptionsData
-        println("room options: ${CrewmateServer.GSON.toJson(room.gameOptionsData!!)}")
+//        println("room options: ${CrewmateServer.GSON.toJson(room.gameOptionsData!!)}")
     }
 
     override fun serialize(buffer: PacketBuffer) {

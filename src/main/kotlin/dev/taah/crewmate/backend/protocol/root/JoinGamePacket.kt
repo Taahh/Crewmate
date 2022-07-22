@@ -5,16 +5,12 @@ import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.api.inner.enums.GameState
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomJoinEvent
-import dev.taah.crewmate.backend.inner.objects.InnerNetObjects
 import dev.taah.crewmate.backend.protocol.AbstractPacket
-import dev.taah.crewmate.backend.protocol.data.SpawnMessage
-import dev.taah.crewmate.backend.util.inner.GameDataUtil
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
-import java.util.function.Consumer
 
 class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
     var gameCode: GameCode? = null

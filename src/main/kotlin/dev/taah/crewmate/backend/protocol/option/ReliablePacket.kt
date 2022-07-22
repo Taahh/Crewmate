@@ -18,6 +18,18 @@ open class ReliablePacket(nonce: Int) :
 
     companion object {
         val RELIABLE_PACKETS: HashMap<Byte, KClass<AbstractPacket<*>>> = Maps.newHashMap();
+        fun registerPacket(id: Byte, clazz: KClass<AbstractPacket<*>>) {
+            RELIABLE_PACKETS[id] = clazz;
+        }
+
+        fun <T : AbstractPacket<T>> getPacket(id: Byte, nonce: Int = -1): AbstractPacket<T>? {
+            if (!RELIABLE_PACKETS.containsKey(id)) {
+                return null;
+            }
+            val clazz = RELIABLE_PACKETS[id];
+            val packet = clazz!!.primaryConstructor!!.call(nonce);
+            return packet as AbstractPacket<T>
+        }
     }
 
     var reliablePacket: AbstractPacket<*>? = null
@@ -25,14 +37,14 @@ open class ReliablePacket(nonce: Int) :
     var payload: HazelMessage? = null
 
     init {
-        this.registerPacket(0x00, HostGamePacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x01, JoinGamePacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x02, StartGamePacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x05, GameDataPacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x06, GameDataToPacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x07, JoinedGamePacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(0x08, EndGamePacket::class as KClass<AbstractPacket<*>>)
-        this.registerPacket(10, AlterGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x00, HostGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x01, JoinGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x02, StartGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x05, GameDataPacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x06, GameDataToPacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x07, JoinedGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x08, EndGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(10, AlterGamePacket::class as KClass<AbstractPacket<*>>)
     }
 
     override fun processPacket(packet: ReliablePacket, connection: PlayerConnection) {
@@ -63,16 +75,5 @@ open class ReliablePacket(nonce: Int) :
     }
 
 
-    fun registerPacket(id: Byte, clazz: KClass<AbstractPacket<*>>) {
-        RELIABLE_PACKETS[id] = clazz;
-    }
 
-    fun <T : AbstractPacket<T>> getPacket(id: Byte, nonce: Int = -1): AbstractPacket<T>? {
-        if (!RELIABLE_PACKETS.containsKey(id)) {
-            return null;
-        }
-        val clazz = RELIABLE_PACKETS[id];
-        val packet = clazz!!.primaryConstructor!!.call(nonce);
-        return packet as AbstractPacket<T>
-    }
 }

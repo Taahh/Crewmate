@@ -1,10 +1,9 @@
 package dev.taah.crewmate.backend.util.inner
 
-import dev.taah.crewmate.api.event.EventManager
-import dev.taah.crewmate.backend.event.room.GameRoomDataEvent
-import dev.taah.crewmate.backend.event.room.GameRoomSpawnEvent
-import dev.taah.crewmate.backend.inner.objects.InnerNetObjects
-import dev.taah.crewmate.backend.inner.objects.impl.GameData
+import com.google.common.collect.Lists
+import com.google.common.collect.Maps
+import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
+import dev.taah.crewmate.backend.inner.objects.impl.*
 import dev.taah.crewmate.backend.protocol.data.DataMessage
 import dev.taah.crewmate.backend.protocol.data.RpcMessage
 import dev.taah.crewmate.backend.protocol.data.SceneChangeMessage
@@ -13,11 +12,31 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
-import org.checkerframework.checker.guieffect.qual.UI
+import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
 class GameDataUtil {
+
     companion object {
+        val INNER_OBJECTS: HashMap<Int, Array<KClass<out AbstractInnerNetObject>>> = Maps.newHashMap();
+
+        init {
+            registerInner(2, LobbyBehavior::class)
+            registerInner(3, GameData::class, VoteBanSystem::class)
+            registerInner(4, PlayerControl::class, PlayerPhysics::class, CustomNetworkTransform::class)
+        }
+        fun registerInner(id: Int, vararg clazz: KClass<out AbstractInnerNetObject>) {
+            INNER_OBJECTS[id] = clazz.toList().toTypedArray()
+        }
+
+        fun getInner(id: Int): ArrayList<KClass<out AbstractInnerNetObject>>? {
+            if (!INNER_OBJECTS.containsKey(id)) {
+                return null;
+            }
+            val array: ArrayList<AbstractInnerNetObject> = Lists.newArrayList()
+            val clazz = INNER_OBJECTS[id];
+            return ArrayList(clazz!!.toList())
+        }
         fun handleGameData(buffer: PacketBuffer, room: GameRoom) {
             var hazel = HazelMessage.read(buffer)
             while (hazel != null) {
