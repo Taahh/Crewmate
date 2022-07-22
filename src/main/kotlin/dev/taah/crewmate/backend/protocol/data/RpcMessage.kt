@@ -49,14 +49,16 @@ class RpcMessage() : AbstractMessage(0x02) {
 
     override fun deserialize(buffer: PacketBuffer) {
         this.targetNetId = buffer.readPackedUInt32().toInt()
-        val callId = buffer.readByte().toInt()
+        val callId = buffer.readUnsignedByte().toInt()
         var unknown = true
         if (RpcFlags.getById(callId) != null) {
             this.rpc = RpcFlags.getById(callId)?.clazz?.createInstance()
             unknown = false
         } else {
-            this.rpc = getRpc(callId)?.createInstance()
-            unknown = false
+            if (getRpc(callId) != null) {
+                this.rpc = getRpc(callId)?.createInstance()
+                unknown = false
+            }
         }
         this.remainingBuffer = buffer
         if (unknown) {

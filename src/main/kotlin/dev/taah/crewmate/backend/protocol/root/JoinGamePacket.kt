@@ -21,8 +21,8 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
     override fun processPacket(packet: JoinGamePacket, connection: PlayerConnection) {
         var room: GameRoom
         if (!GameRoom.exists(gameCode!!)) {
-            room = GameRoom(gameCode!!)
-            GameRoom.ROOMS[gameCode!!] = room
+            connection.sendDisconnect(DisconnectReasons.GameNotFound)
+            return
         } else {
             room = GameRoom.get(gameCode!!)
         }
