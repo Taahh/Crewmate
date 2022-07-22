@@ -1,13 +1,14 @@
 package dev.taah.crewmate.backend.inner.objects
 
-import dev.taah.crewmate.api.inner.IInnerNetObject
-import dev.taah.crewmate.backend.inner.objects.impl.*
+import dev.taah.crewmate.backend.inner.objects.impl.CustomNetworkTransform
+import dev.taah.crewmate.backend.inner.objects.impl.PlayerPhysics
+import dev.taah.crewmate.backend.inner.objects.impl.VoteBanSystem
 import kotlin.reflect.KClass
 
 enum class InnerNetObjects(val spawnId: Int, vararg objects: KClass<out AbstractInnerNetObject>) {
-    LOBBY_BEHAVIOR(2, LobbyBehavior::class),
-    GAME_DATA(3, GameData::class, VoteBanSystem::class),
-    PLAYER_CONTROL(4, PlayerControl::class, PlayerPhysics::class, CustomNetworkTransform::class);
+    LobbyBehavior(2, dev.taah.crewmate.backend.inner.objects.impl.LobbyBehavior::class),
+    GameData(3, dev.taah.crewmate.backend.inner.objects.impl.GameData::class, VoteBanSystem::class),
+    PlayerControl(4, dev.taah.crewmate.backend.inner.objects.impl.PlayerControl::class, PlayerPhysics::class, CustomNetworkTransform::class);
 
     val objects: List<KClass<out AbstractInnerNetObject>>
 

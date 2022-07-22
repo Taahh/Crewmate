@@ -5,6 +5,8 @@ import dev.taah.crewmate.api.inner.enums.GameVisibility
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomVisibilityUpdateEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.protocol.data.RpcMessage
+import dev.taah.crewmate.backend.protocol.data.rpc.SetNameRpc
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer

@@ -6,7 +6,6 @@ import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
-import org.checkerframework.checker.guieffect.qual.UI
 
 class GameData(override val netId: Int, override val ownerId: Int) : AbstractInnerNetObject() {
     val players: HashMap<Byte, PlayerInfo> = Maps.newHashMap()
@@ -14,7 +13,8 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
     var dirtyBits: UInt = 0U
     override fun processObject(room: GameRoom) {
         for (x in players.values) {
-            room.getConnectionByPlayerId(x.playerId)!!.playerInfo = x
+            println("game data player ${x.playerId}")
+            room.getConnectionByPlayerId(x.playerId)?.playerInfo = x
         }
         this.initialState = false
         room.spawnedObjects[this.netId] = this

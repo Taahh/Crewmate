@@ -13,6 +13,7 @@ import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.AcknowledgementPacket
 import dev.taah.crewmate.backend.protocol.option.DisconnectPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
+import dev.taah.crewmate.backend.protocol.root.GameDataPacket
 import dev.taah.crewmate.backend.protocol.root.GameDataToPacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
@@ -68,33 +69,9 @@ class PlayerConnection(
         CrewmateServer.LOGGER!!.debug(
             "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName}"
         )
-        if (packet is GameDataToPacket) {
+        if (packet is GameDataToPacket || packet is GameDataPacket) {
             CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
         }
-    }
-
-    fun sendGameData(packet: GameDataToPacket, consumer: Consumer<PacketBuffer>? = null) {
-        val buffer = PacketBuffer()
-        buffer.writeByte(packet.packetType.toInt())
-        buffer.writeShort(this.getNextNonce())
-        if (consumer != null) {
-            packet.consumer = consumer
-        }
-        packet.target = GameRoom.get(this.gameCode!!).connections.entries.find { entry -> entry.value.uniqueId.equals(this.uniqueId) }!!.key
-        packet.gameCode = this.gameCode!!
-        packet.serialize(buffer)
-        channel.channel().writeAndFlush(buffer.copyPacketBuffer().retain()).addListener {
-            ChannelFutureListener { future ->
-                if (future.isSuccess) {
-                    channel.channel().read()
-                } else {
-                    future.channel().close()
-                }
-            }
-        }
-        CrewmateServer.LOGGER!!.debug(
-            "Sending packet to ${this.clientName}: GameDataToPacket with buffer ${ByteBufUtil.prettyHexDump(buffer)}"
-        )
     }
 
     fun startRPC(targetNetId: Int, callId: Byte, targetClientId: Int = -1): Pair<HazelMessage, HazelMessage> {

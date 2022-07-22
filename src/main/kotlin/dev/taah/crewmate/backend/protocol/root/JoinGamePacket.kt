@@ -7,6 +7,7 @@ import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomJoinEvent
 import dev.taah.crewmate.backend.inner.objects.InnerNetObjects
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.protocol.data.SpawnMessage
 import dev.taah.crewmate.backend.util.inner.GameDataUtil
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
@@ -100,13 +101,6 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
 
         if (room.host != id) {
             room.broadcastReliablePacket(joinGamePacket, id)
-//            connection.sendGameData(GameDataToPacket(-1), Consumer { GameDataUtil.writeSpawnMessage(it, room, -2, InnerNetObjects.GAME_DATA) })
-//
-//            for (x in room.connections.keys.filter { it != id }) {
-//                connection.sendGameData(GameDataToPacket(-1), Consumer { GameDataUtil.writeSpawnMessage(it, room, x, InnerNetObjects.PLAYER_CONTROL) })
-//            }
-//
-//            connection.sendGameData(GameDataToPacket(-1), Consumer { GameDataUtil.writeSpawnMessage(it, room, -2, InnerNetObjects.LOBBY_BEHAVIOR) })
         }
         connection.sendReliablePacket(packet)
         EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))
