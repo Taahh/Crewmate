@@ -7,7 +7,7 @@ import dev.taah.crewmate.backend.inner.roles.RoleOptionsData
 import dev.taah.crewmate.backend.inner.roles.RoleRate
 import dev.taah.crewmate.util.PacketBuffer
 
-class GameOptionsData : IGameOptionsData<RoleRate> {
+class GameOptionsData : IGameOptionsData<RoleOptionsData> {
     override var version: Byte = 0
     override var maxPlayers: Byte = 0
     override var keywords: Int = 0
@@ -30,7 +30,7 @@ class GameOptionsData : IGameOptionsData<RoleRate> {
     override var visualTasks: Boolean = false
     override var anonymousVoting: Boolean = false
     override var taskbarMode: TaskBarMode = TaskBarMode.Normal
-    override var roleOptionsData: IRoleOptionsData<RoleRate> = RoleOptionsData()
+    override var roleOptionsData: RoleOptionsData = RoleOptionsData()
 
     override fun serialize(buffer: PacketBuffer) {
         var position = buffer.writerIndex()
@@ -74,28 +74,28 @@ class GameOptionsData : IGameOptionsData<RoleRate> {
         buffer.resetWriterIndex()
     }
 
-    override fun deserialize(buffer: PacketBuffer): IGameOptionsData<RoleRate> {
+    override fun deserialize(buffer: PacketBuffer): IGameOptionsData<RoleOptionsData> {
         buffer.readPackedUInt32()
         val gameOptionsData = GameOptionsData()
-        gameOptionsData.version = buffer.readByte()
-        gameOptionsData.maxPlayers = buffer.readByte()
+        gameOptionsData.version = buffer.readUnsignedByte().toByte()
+        gameOptionsData.maxPlayers = buffer.readUnsignedByte().toByte()
         gameOptionsData.keywords = buffer.readUInt32().toInt()
-        gameOptionsData.map = buffer.readByte()
+        gameOptionsData.map = buffer.readUnsignedByte().toByte()
         gameOptionsData.speed = buffer.readFloatLE()
         gameOptionsData.crewLight = buffer.readFloatLE()
         gameOptionsData.imposterLight = buffer.readFloatLE()
         gameOptionsData.killCooldown = buffer.readFloatLE()
-        gameOptionsData.commonTasks = buffer.readByte()
-        gameOptionsData.longTasks = buffer.readByte()
-        gameOptionsData.shortTasks = buffer.readByte()
-        gameOptionsData.emergencyMeetings = buffer.readInt32()
-        gameOptionsData.imposters = buffer.readByte()
-        gameOptionsData.killDistance = buffer.readByte()
-        gameOptionsData.discussionTime = buffer.readInt32()
-        gameOptionsData.votingTime = buffer.readInt32()
+        gameOptionsData.commonTasks = buffer.readUnsignedByte().toByte()
+        gameOptionsData.longTasks = buffer.readUnsignedByte().toByte()
+        gameOptionsData.shortTasks = buffer.readUnsignedByte().toByte()
+        gameOptionsData.emergencyMeetings = buffer.readUInt32().toInt()
+        gameOptionsData.imposters = buffer.readUnsignedByte().toByte()
+        gameOptionsData.killDistance = buffer.readUnsignedByte().toByte()
+        gameOptionsData.discussionTime = buffer.readUInt32().toInt()
+        gameOptionsData.votingTime = buffer.readUInt32().toInt()
         gameOptionsData.default = buffer.readBoolean()
         if (gameOptionsData.version > 1) {
-            gameOptionsData.emergencyCooldowns = buffer.readByte()
+            gameOptionsData.emergencyCooldowns = buffer.readUnsignedByte().toByte()
         }
         if (gameOptionsData.version > 2) {
             gameOptionsData.confirmEjects = buffer.readBoolean()
@@ -103,10 +103,11 @@ class GameOptionsData : IGameOptionsData<RoleRate> {
         }
         if (gameOptionsData.version > 3) {
             gameOptionsData.anonymousVoting = buffer.readBoolean()
-            gameOptionsData.taskbarMode = TaskBarMode.getById(buffer.readByte().toInt())!!
+            gameOptionsData.taskbarMode = TaskBarMode.getById(buffer.readUnsignedByte().toInt())!!
         }
         if (gameOptionsData.version > 4) {
-            gameOptionsData.roleOptionsData = RoleOptionsData().deserialize(buffer)
+            gameOptionsData.roleOptionsData = RoleOptionsData().deserialize(buffer) as RoleOptionsData
+            println("set data")
         }
         return gameOptionsData
     }

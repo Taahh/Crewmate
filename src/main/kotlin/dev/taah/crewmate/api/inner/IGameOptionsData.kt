@@ -9,7 +9,7 @@ import dev.taah.crewmate.api.serialization.ISerializable
  * @project crewmate
  * @since 7:03 PM [20-05-2022]
  */
-interface IGameOptionsData<R> : ISerializable, IDeserializable<IGameOptionsData<R>> {
+interface IGameOptionsData<R : IRoleOptionsData<*>> : ISerializable, IDeserializable<IGameOptionsData<R>> {
     var version: Byte
     var maxPlayers: Byte
     var keywords: Int
@@ -32,5 +32,5 @@ interface IGameOptionsData<R> : ISerializable, IDeserializable<IGameOptionsData<
     var visualTasks: Boolean
     var anonymousVoting: Boolean
     var taskbarMode: TaskBarMode
-    var roleOptionsData: IRoleOptionsData<R>
+    var roleOptionsData: R
 }

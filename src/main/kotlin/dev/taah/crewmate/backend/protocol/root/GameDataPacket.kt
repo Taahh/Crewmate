@@ -14,7 +14,7 @@ import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
 import io.netty.buffer.ByteBufUtil
 
-class GameDataPacket(nonce: Int) : AbstractPacket<GameDataPacket>(0x01, nonce) {
+class GameDataPacket(nonce: Int = -1) : AbstractPacket<GameDataPacket>(0x01, nonce) {
 
     var gameCode: GameCode? = null
     var buffer: PacketBuffer? = null

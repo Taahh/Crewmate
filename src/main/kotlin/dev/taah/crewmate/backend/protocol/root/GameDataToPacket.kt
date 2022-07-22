@@ -15,7 +15,7 @@ import dev.taah.crewmate.util.inner.GameCode
 import io.netty.buffer.ByteBufUtil
 import java.util.function.Consumer
 
-class GameDataToPacket(nonce: Int) : AbstractPacket<GameDataToPacket>(0x01, nonce) {
+class GameDataToPacket(nonce: Int = -1) : AbstractPacket<GameDataToPacket>(0x01, nonce) {
 
     var target: Int = 0
     var gameCode: GameCode? = null

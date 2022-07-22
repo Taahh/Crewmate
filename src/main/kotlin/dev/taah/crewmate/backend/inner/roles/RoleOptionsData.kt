@@ -42,24 +42,29 @@ class RoleOptionsData(
 
     override fun deserialize(buffer: PacketBuffer): IRoleOptionsData<RoleRate> {
         val roleOptionsData = RoleOptionsData()
-        val num = buffer.readPackedInt32()
-        for (i in 0..num ){
-            val type = RoleType.getById(buffer.readInt16().toInt());
+        val num = buffer.readInt32()
+        for (i in 0..num) {
+            val roleType = buffer.readUInt16()
+            val type = RoleType.getById(roleType)
+            if (type == null) {
+                buffer.readerIndex(buffer.readerIndex() - 2)
+                continue
+            }
             val rate = RoleRate(
-                buffer.readByte().toInt(),
-                buffer.readByte().toInt(),
+                buffer.readUnsignedByte().toInt(),
+                buffer.readUnsignedByte().toInt(),
             )
-            roleOptionsData.roleRates[type!!] = rate;
+            roleOptionsData.roleRates[type] = rate;
         }
         roleOptionsData.shapeshifterLeaveSkin = buffer.readBoolean()
-        roleOptionsData.shapeshifterCooldown = buffer.readByte()
-        roleOptionsData.shapeshifterDuration = buffer.readByte()
-        roleOptionsData.scientistCooldown = buffer.readByte()
-        roleOptionsData.guardianAngelCooldown = buffer.readByte()
-        roleOptionsData.engineerCooldown = buffer.readByte()
-        roleOptionsData.engineerVentMaxTime = buffer.readByte()
-        roleOptionsData.scientistBatteryCharge = buffer.readByte()
-        roleOptionsData.protectionDuration = buffer.readByte()
+        roleOptionsData.shapeshifterCooldown = buffer.readUnsignedByte().toByte()
+        roleOptionsData.shapeshifterDuration = buffer.readUnsignedByte().toByte()
+        roleOptionsData.scientistCooldown = buffer.readUnsignedByte().toByte()
+        roleOptionsData.guardianAngelCooldown = buffer.readUnsignedByte().toByte()
+        roleOptionsData.engineerCooldown = buffer.readUnsignedByte().toByte()
+        roleOptionsData.engineerVentMaxTime = buffer.readUnsignedByte().toByte()
+        roleOptionsData.scientistBatteryCharge = buffer.readUnsignedByte().toByte()
+        roleOptionsData.protectionDuration = buffer.readUnsignedByte().toByte()
         roleOptionsData.impostersSeeProtected = buffer.readBoolean()
         return roleOptionsData
     }

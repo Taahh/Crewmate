@@ -37,6 +37,8 @@ class AlterGamePacket(nonce: Int) : AbstractPacket<AlterGamePacket>(0x01, nonce)
                     println("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
                     conn.sendBuffer(buffer)
                 }*/
+                val rpcMessage = RpcMessage().rpc(SetNameRpc().name("yo mama")).target(room.connections[room.host]!!.playerControl!!.netId)
+                room.broadcastReliablePacket(GameDataPacket().addMessage(rpcMessage).gameCode(room.gameCode))
             }
         }
     }

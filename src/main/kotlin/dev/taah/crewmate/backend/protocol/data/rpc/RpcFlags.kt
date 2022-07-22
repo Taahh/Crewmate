@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 enum class RpcFlags(val id: Int, vararg objects: KClass<out AbstractMessage>) {
     PlayAnimation(0),
     CompleteTask(1),
-    SyncSettings(2),
+    SyncSettings(2, SyncSettingsRpc::class),
     SetInfected(3),
     Exiled(4),
     CheckName(5, CheckNameRpc::class),

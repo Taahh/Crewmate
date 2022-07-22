@@ -15,6 +15,6 @@ class CheckNameRpc : AbstractMessage(0x00) {
     }
 
     override fun deserialize(buffer: PacketBuffer) {
-        println("rpc check name for $targetNetId")
+        buffer.readPackedString()
     }
 }

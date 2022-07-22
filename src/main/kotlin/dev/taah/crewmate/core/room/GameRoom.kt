@@ -9,6 +9,7 @@ import dev.taah.crewmate.api.inner.enums.GameVisibility
 import dev.taah.crewmate.api.room.IRoom
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.inner.data.PlayerInfo
+import dev.taah.crewmate.backend.inner.game.GameOptionsData
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.backend.inner.objects.impl.GameData
 import dev.taah.crewmate.backend.protocol.AbstractPacket
@@ -33,6 +34,7 @@ class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>, Playe
     override var host: Int = -1
     override var state: GameState = GameState.NotStarted
     override var visibility: GameVisibility = GameVisibility.Private
+    override var gameOptionsData: GameOptionsData? = null
     var gameData: GameData? = null
         get() {
             return this.spawnedObjects.values.find { inner -> inner.isGameData() } as GameData?

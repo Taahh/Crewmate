@@ -11,8 +11,6 @@ class SetNameRpc : AbstractMessage(0x00) {
     var name: String? = null
 
     override fun processObject(room: GameRoom) {
-        val rpcMessage = RpcMessage().rpc(this).target(room.connections[room.host]!!.playerControl!!.netId)
-        room.broadcastReliablePacket(GameDataPacket(-1).addMessage(rpcMessage).gameCode(room.gameCode))
     }
 
     override fun serialize(buffer: PacketBuffer) {

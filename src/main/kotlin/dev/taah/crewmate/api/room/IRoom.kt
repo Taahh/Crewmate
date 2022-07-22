@@ -6,6 +6,7 @@ import dev.taah.crewmate.api.inner.enums.GameVisibility
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.api.inner.IInnerNetObject
 import dev.taah.crewmate.api.inner.IPlayerInfo
+import dev.taah.crewmate.backend.inner.game.GameOptionsData
 import dev.taah.crewmate.util.inner.GameCode
 
 interface IRoom<P, T: IConnection<*>, C: IPlayerInfo> {
@@ -16,6 +17,7 @@ interface IRoom<P, T: IConnection<*>, C: IPlayerInfo> {
     var host: Int
     var state: GameState
     var visibility: GameVisibility
+    var gameOptionsData: GameOptionsData?
 
     fun broadcastPacket(packet: P, reliable: Boolean = false, vararg exclude: Int)
 
