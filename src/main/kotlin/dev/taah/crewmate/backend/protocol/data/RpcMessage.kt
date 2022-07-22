@@ -35,8 +35,16 @@ class RpcMessage() : AbstractMessage(0x02) {
     }
 
     override fun processObject(room: GameRoom) {
-        this.rpc?.deserialize(this.remainingBuffer!!)
-        this.rpc?.processObject(room)
+        if (this.rpc != null) {
+            if (this.rpc!!.javaClass.declaredFields.any { it.name.equals("targetNetId") }) {
+                val field = this.rpc!!.javaClass.getDeclaredField("targetNetId")
+                field.isAccessible = true
+                field.set(this.rpc!!, this.targetNetId)
+                println("field set to ${field.get(this.rpc!!)}")
+            }
+            this.rpc!!.deserialize(this.remainingBuffer!!)
+            this.rpc!!.processObject(room)
+        }
     }
 
     override fun serialize(buffer: PacketBuffer) {

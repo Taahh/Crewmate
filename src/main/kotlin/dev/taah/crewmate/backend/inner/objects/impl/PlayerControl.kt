@@ -1,7 +1,9 @@
 package dev.taah.crewmate.backend.inner.objects.impl
 
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
+import dev.taah.crewmate.backend.protocol.data.AbstractMessage
 import dev.taah.crewmate.backend.protocol.data.RpcMessage
+import dev.taah.crewmate.backend.protocol.data.rpc.SendChatRpc
 import dev.taah.crewmate.backend.protocol.data.rpc.SetNameRpc
 import dev.taah.crewmate.backend.protocol.root.GameDataPacket
 import dev.taah.crewmate.core.CrewmateServer
@@ -49,10 +51,17 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
         return GameRoom.get(this.gameCode!!)
     }
 
-    fun rpcSetName(name: String) {
+    fun sendRpc(rpc: AbstractMessage) {
         val room: GameRoom = checkRoom() ?: return
-        val rpc = SetNameRpc(name)
         val rpcMessage = RpcMessage(this.netId, rpc)
         room.broadcastReliablePacket(GameDataPacket(this.gameCode!!, rpcMessage))
+    }
+
+    fun rpcSetName(name: String) {
+        sendRpc(SetNameRpc(name))
+    }
+
+    fun rpcSendChat(message: String) {
+        sendRpc(SendChatRpc(message))
     }
 }

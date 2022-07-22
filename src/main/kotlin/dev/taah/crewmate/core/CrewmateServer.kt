@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.backend.connection.PlayerConnection
+import dev.taah.crewmate.backend.plugin.PluginManager
 import dev.taah.crewmate.backend.util.UDPServerChannel
 import dev.taah.crewmate.core.protocol.PacketHandler
 import dev.taah.crewmate.core.protocol.ProtocolHandler
@@ -25,17 +26,14 @@ fun setup() {
     }
 }
 
-fun main() {/*
-    val source = ConfigurationSource(CrewmateServer::class.java.getResourceAsStream("/log4j2.properties"))
-
-    Configurator.initialize(null, source)*/
-//    val PATTERN = "%d [%p|%c|%C{1}] %m%n"
-//    console.
-//    console.activateOptions()
-//    LogManager.getRootLogger()
+fun main() {
     setup()
     EventManager.INSTANCE = EventManager()
     EventManager.INSTANCE!!.registerEvent(TestEvent())
+
+    val pluginManager = PluginManager()
+    pluginManager.loadPlugins()
+    pluginManager.enablePlugins()
 
     Runtime.getRuntime().addShutdownHook(object : Thread() {
         override fun run() {
@@ -45,6 +43,7 @@ fun main() {/*
                     "Crewmate was shut down!"
                 )
             }
+            pluginManager.disablePlugins()
         }
     })
 
@@ -70,7 +69,8 @@ fun main() {/*
 
 class CrewmateServer {
     companion object {
-        val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+        val PRETTY_GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+        val GSON: Gson = Gson()
         val CONNECTIONS: HashMap<InetSocketAddress, PlayerConnection> = Maps.newHashMap()
         val HANDLER: ProtocolHandler = ProtocolHandler()
         val LOGGER: Logger = LogManager.getLogger(CrewmateServer::class.java)

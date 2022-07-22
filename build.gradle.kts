@@ -1,6 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    `maven-publish`
+    id("com.github.johnrengelman.shadow") version("7.1.2")
     kotlin("jvm") version "1.6.21"
 }
 
@@ -18,7 +21,7 @@ dependencies {
     implementation("org.projectlombok:lombok:1.18.22")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
     implementation("com.google.code.gson:gson:2.9.0")
-    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+    implementation("org.json:json:20220320")
     implementation("org.apache.logging.log4j:log4j-core:2.18.0")
 
     annotationProcessor("org.projectlombok:lombok:1.18.22")
@@ -26,4 +29,20 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
+}
+
+tasks.getByName<ShadowJar>("shadowJar") {
+    archiveClassifier.set("")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "${project.group}"
+            artifactId = project.name
+            version = "${project.version}"
+
+            project.shadow.component(this)
+        }
+    }
 }

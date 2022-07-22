@@ -12,6 +12,7 @@ import dev.taah.crewmate.backend.inner.data.PlayerInfo
 import dev.taah.crewmate.backend.inner.game.GameOptionsData
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.backend.inner.objects.impl.GameData
+import dev.taah.crewmate.backend.inner.objects.impl.PlayerControl
 import dev.taah.crewmate.backend.protocol.AbstractPacket
 import dev.taah.crewmate.backend.protocol.option.ReliablePacket
 import dev.taah.crewmate.util.inner.GameCode
@@ -49,6 +50,14 @@ class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>, Playe
         return connections.values.find { it.playerControl != null && it.playerControl!!.playerId == id }
     }
 
+    fun getConnectionByPlayerControlNetId(id: Int): PlayerConnection? {
+        return this.connections.values.find { it.playerControl != null && it.playerControl!!.netId == id }
+    }
+
+    fun getConnectionByPlayerPhysicsNetId(id: Int): PlayerConnection? {
+        return this.connections.values.find { it.playerControl != null && it.playerControl!!.playerPhysics != null && it.playerControl!!.playerPhysics!!.netId == id }
+    }
+
     fun broadcastReliablePacket(packet: AbstractPacket<*>, vararg exclude: Int) {
         broadcastPacket(packet, true, *exclude)
     }
@@ -77,9 +86,5 @@ class GameRoom(override var gameCode: GameCode) : IRoom<AbstractPacket<*>, Playe
             }
         }
         println("---------------------------------------------------------")
-    }
-
-    fun update() {
-        ROOMS[get(this.gameCode).gameCode] = this
     }
 }
