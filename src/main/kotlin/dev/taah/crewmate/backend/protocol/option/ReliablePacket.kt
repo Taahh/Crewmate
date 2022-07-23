@@ -51,6 +51,11 @@ open class ReliablePacket(nonce: Int) :
         connection.sendAck(this.nonce)
         if (this.payload != null) {
             val packet = getPacket<AbstractPacket<*>>(this.payload!!.getTag().toByte())!!
+            if (packet.javaClass.declaredFields.any { it.name.equals("sender") }) {
+                val field = packet.javaClass.getDeclaredField("sender")
+                field.isAccessible = true
+                field.set(packet, connection)
+            }
             packet.deserialize(this.payload!!.payload!!)
             packet.processPacket(packet, connection)
         }

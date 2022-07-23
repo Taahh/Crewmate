@@ -8,7 +8,7 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class SyncSettingsRpc : AbstractMessage(0x00) {
+class SyncSettingsRpc : AbstractMessage() {
 
     var gameOptionsData: GameOptionsData? = null
 

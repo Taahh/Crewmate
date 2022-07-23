@@ -1,10 +1,8 @@
 package dev.taah.crewmate.backend.inner.game
 
 import dev.taah.crewmate.api.inner.IGameOptionsData
-import dev.taah.crewmate.api.inner.IRoleOptionsData
 import dev.taah.crewmate.api.inner.enums.TaskBarMode
 import dev.taah.crewmate.backend.inner.roles.RoleOptionsData
-import dev.taah.crewmate.backend.inner.roles.RoleRate
 import dev.taah.crewmate.util.PacketBuffer
 
 class GameOptionsData : IGameOptionsData<RoleOptionsData> {

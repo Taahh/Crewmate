@@ -16,6 +16,8 @@ import io.netty.buffer.ByteBufUtil
 
 class GameDataPacket(nonce: Int = -1) : AbstractPacket<GameDataPacket>(0x01, nonce) {
 
+    var sender: PlayerConnection? = null
+
     var gameCode: GameCode? = null
     var buffer: PacketBuffer? = null
 
@@ -31,7 +33,7 @@ class GameDataPacket(nonce: Int = -1) : AbstractPacket<GameDataPacket>(0x01, non
             if (GameRoom.exists(gameCode!!)) {
                 var room = GameRoom.get(gameCode!!)
                 var id = room.connections.entries.filter { entry -> entry.value.uniqueId.equals(connection.uniqueId) }.map { mutableEntry -> mutableEntry.key }.first()
-                room.broadcastReliablePacket(packet, id)
+//                room.broadcastReliablePacket(packet, id)
             }
         }
     }
@@ -48,10 +50,11 @@ class GameDataPacket(nonce: Int = -1) : AbstractPacket<GameDataPacket>(0x01, non
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+        println("GAME DATA")
         this.gameCode = GameCode(buffer.readInt32())
         this.buffer = buffer.copyPacketBuffer()
 
-        GameDataUtil.handleGameData(buffer, GameRoom.get(this.gameCode!!))
+        GameDataUtil.handleGameData(buffer, GameRoom.get(this.gameCode!!), sender = this.sender)
     }
 
     fun addMessage(message: AbstractMessage): GameDataPacket {

@@ -11,6 +11,8 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
     val players: HashMap<Byte, PlayerInfo> = Maps.newHashMap()
     override var initialState: Boolean = false
     var dirtyBits: UInt = 0U
+    var room: GameRoom? = null
+    var target: Int? = null
     override fun processObject(room: GameRoom) {
         for (x in players.values) {
             println("game data player ${x.playerId}")
@@ -24,7 +26,11 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
         var num = 0
         val players = this.players.values.toList()
         for (i in 0 until players.size) {
-            if (this.initialState || this.isDirtyBitSet(players[i].playerId.toInt())) {
+            if (room != null && target != null && target!! == room!!.connections.entries.first { it.value.uniqueId.equals(room!!.getConnectionByPlayerId(players[i].playerId)!!.uniqueId) }.key) {
+                continue
+            }
+            println("dirty bit for ${players[i].playerId}? ${this.isDirtyBitSet(players[i].playerId.toInt())}")
+            /*if (this.initialState || this.isDirtyBitSet(players[i].playerId.toInt())) {
                 if (!this.initialState) {
                     this.unsetDirtyBit(players[i].playerId.toUInt())
                 }
@@ -38,6 +44,18 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
                         for (j in i+1 until this.players.size) {
                             this.setDirtyBit(1U shl (players[j].playerId.toInt()))
                         }
+                    }
+                }
+            }*/
+            val hazel = HazelMessage.start(players[i].playerId.toInt())
+            println("Started game data with tag ${hazel.getTag()}")
+            players[i].serialize(hazel.payload!!)
+            hazel.endMessage()
+            hazel.copyTo(buffer)
+            if (++num > 4) {
+                if (this.initialState) {
+                    for (j in i+1 until this.players.size) {
+                        this.setDirtyBit(1U shl (players[j].playerId.toInt()))
                     }
                 }
             }

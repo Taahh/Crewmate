@@ -9,7 +9,7 @@ import dev.taah.crewmate.util.PacketBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-class RpcMessage() : AbstractMessage(0x02) {
+class RpcMessage() : AbstractMessage() {
     companion object {
         val RPCS: HashMap<Int, KClass<out AbstractMessage>> = Maps.newHashMap();
         fun registerRpc(id: Int, clazz: KClass<out AbstractMessage>) {
@@ -42,6 +42,7 @@ class RpcMessage() : AbstractMessage(0x02) {
                 field.set(this.rpc!!, this.targetNetId)
                 println("field set to ${field.get(this.rpc!!)}")
             }
+            CrewmateServer.LOGGER.debug("RPC Handling: ${this.rpc!!.javaClass.simpleName}")
             this.rpc!!.deserialize(this.remainingBuffer!!)
             this.rpc!!.processObject(room)
         }

@@ -1,5 +1,6 @@
 package dev.taah.crewmate.backend.connection
 
+import com.google.common.collect.Lists
 import dev.taah.crewmate.api.connection.IConnection
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.DisconnectReasons
@@ -25,7 +26,6 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandlerContext
 import io.netty.util.AttributeKey
 import java.util.*
-import java.util.function.Consumer
 
 class PlayerConnection(
     @Transient val channel: ChannelHandlerContext,
@@ -47,7 +47,20 @@ class PlayerConnection(
     }
 
     fun getPlayerControlObjects(): Array<AbstractInnerNetObject> {
-        return arrayOf(this.playerControl!!, this.playerControl!!.playerPhysics!!, this.playerControl!!.customNetworkTransform!!)
+        val objects = Lists.newArrayList<AbstractInnerNetObject>()
+        if (this.playerControl != null)
+        {
+            objects.add(this.playerControl!!)
+            if (this.playerControl!!.playerPhysics != null)
+            {
+                objects.add(this.playerControl!!.playerPhysics)
+            }
+            if (this.playerControl!!.customNetworkTransform != null)
+            {
+                objects.add(this.playerControl!!.customNetworkTransform)
+            }
+        }
+        return objects.toTypedArray()
     }
 
     override fun sendPacket(packet: AbstractPacket<*>, nonce: Int) {
@@ -70,48 +83,10 @@ class PlayerConnection(
             "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName}"
         )
         if (packet is GameDataToPacket || packet is GameDataPacket) {
-            CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
+            CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.hexDump(buffer)}")
         }
     }
 
-    fun startRPC(targetNetId: Int, callId: Byte, targetClientId: Int = -1): Pair<HazelMessage, HazelMessage> {
-        val hazel: HazelMessage
-        if (targetClientId < 0) {
-            hazel = HazelMessage.start(0x05)
-            hazel.payload!!.writeInt32(this.gameCode!!.codeInt)
-        } else {
-            hazel = HazelMessage.start(0x06)
-            hazel.payload!!.writeInt32(this.gameCode!!.codeInt)
-        }
-        val rpc = HazelMessage.start(0x02)
-        rpc.payload!!.writePackedUInt32(targetNetId.toLong())
-        rpc.payload!!.writeByte(callId.toInt())
-        return Pair(hazel, rpc)
-    }
-
-    fun endRPC(hazel: HazelMessage): PacketBuffer {
-        val buffer = PacketBuffer()
-        buffer.writeByte(0x01)
-        buffer.writeShort(this.getNextNonce())
-        hazel.endMessage()
-        hazel.copyTo(buffer)
-        return buffer
-    }
-
-    fun sendBuffer(buffer: PacketBuffer) {
-        channel.channel().writeAndFlush(buffer.copyPacketBuffer().retain()).addListener {
-            ChannelFutureListener { future ->
-                if (future.isSuccess) {
-                    channel.channel().read()
-                } else {
-                    future.channel().close()
-                }
-            }
-        }
-        CrewmateServer.LOGGER!!.debug(
-            "Sending buffer to ${this.clientName}"
-        )
-    }
 
     override fun sendReliablePacket(packet: AbstractPacket<*>) {
         val nonce = this.getNextNonce()

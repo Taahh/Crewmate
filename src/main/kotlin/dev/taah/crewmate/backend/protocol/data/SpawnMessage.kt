@@ -4,16 +4,22 @@ import com.google.common.collect.Lists
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.backend.event.room.GameRoomSpawnEvent
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
+import dev.taah.crewmate.backend.inner.objects.impl.GameData
+import dev.taah.crewmate.backend.protocol.root.GameDataPacket
+import dev.taah.crewmate.backend.protocol.root.GameDataToPacket
 import dev.taah.crewmate.backend.util.inner.GameDataUtil
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
+import java.util.function.Consumer
 import kotlin.reflect.full.primaryConstructor
 
-class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
+class SpawnMessage(val room: GameRoom) : AbstractMessage() {
 
     var innerNetObjects: ArrayList<InnerNetObjectWrapper> = Lists.newArrayList()
+
+    var buffer: PacketBuffer? = null
 
     fun addInnerNetObject(spawnId: Int, ownerId: Int = -2): SpawnMessage {
         this.innerNetObjects.add(InnerNetObjectWrapper(ownerId, null, spawnId))
@@ -22,8 +28,50 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
 
     override fun processObject(room: GameRoom) {
         this.innerNetObjects.forEach {
-            it.innerNetObject!!.processObject(room)
-            EventManager.INSTANCE!!.callEvent(GameRoomSpawnEvent(room, it.spawnId, it.innerNetObject))
+            it.innerNetObjects!!.forEach { obj -> obj.processObject(room) }
+            EventManager.INSTANCE!!.callEvent(GameRoomSpawnEvent(room, it.spawnId, it.innerNetObjects))
+        }
+
+        if (this.target != null) {
+            CrewmateServer.LOGGER.debug("TARGET WAS NOT NULL, SENDING GAME DATA TO FOR SPAWN")
+            val spawnMessage = SpawnMessage(room).addInnerNetObject(3).addInnerNetObject(2)
+
+            for ((k, v) in room.connections) {
+                if (k == target) {
+                    continue
+                }
+                spawnMessage.addInnerNetObject(4, k)
+            }
+            spawnMessage.sender = sender
+            spawnMessage.target = target
+            room.connections[this.target]?.sendReliablePacket(GameDataToPacket().target(this.target!!).gameCode(room.gameCode).addMessage(this))
+        } else {
+            CrewmateServer.LOGGER.debug("SENDING GAME DATA PAKCET FOR SPAWN")
+            if (sender != null) {
+                CrewmateServer.LOGGER.debug("SENDER WAS NOT NULL")
+                val entry = room.connections.entries.find { entry -> entry.value.uniqueId.equals(this.sender!!.uniqueId) }
+                val spawnMessage = SpawnMessage(room).addInnerNetObject(3).addInnerNetObject(2)
+
+                for ((k, v) in room.connections) {
+                    if (v.uniqueId.equals(sender!!.uniqueId)) {
+                        continue
+                    }
+                    spawnMessage.addInnerNetObject(4, k)
+                }
+                spawnMessage.sender = sender
+                spawnMessage.target = target
+                room.broadcastReliablePacket(GameDataPacket().gameCode(room.gameCode).addMessage(this), entry!!.key)
+            } else {
+                CrewmateServer.LOGGER.debug("SENDER WAS NULL")
+                val spawnMessage = SpawnMessage(room).addInnerNetObject(3).addInnerNetObject(2)
+
+                for ((k, v) in room.connections) {
+                    spawnMessage.addInnerNetObject(4, k)
+                }
+                spawnMessage.sender = sender
+                spawnMessage.target = target
+                room.broadcastReliablePacket(GameDataPacket().gameCode(room.gameCode).addMessage(this))
+            }
         }
     }
 
@@ -37,17 +85,31 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
             val innerNetObjects = GameDataUtil.getInner(it.spawnId) ?: throw RuntimeException("Inner Net Object with spawn Id ${it.spawnId} was not registered!")
 
             hazel.payload!!.writePackedInt32(innerNetObjects!!.size)
-            if (it.spawnId == 4) {
+            it.innerNetObjects!!.forEach(Consumer { obj ->
+                run {
+                    val hazelInner = HazelMessage.start(0x01)
+                    obj.initialState = true
+                    CrewmateServer.LOGGER.debug("serializing ${obj.javaClass.simpleName} with owner id ${obj.ownerId} and net id ${obj.netId} and spawn id ${it.spawnId}")
+                    obj.serialize(hazelInner.payload!!)
+                    obj.initialState = false
+                    hazelInner.endMessage()
+                    hazelInner.copyTo(hazel.payload!!)
+                }
+            })
+            /*if (it.spawnId == 4) {
+                CrewmateServer.LOGGER.debug("SERIALIZING OWNER ID'S PLAYER STUFF ${it.ownerId}")
                 val playerControl = room.getConnectionByClientId(it.ownerId)
-                for (x in playerControl!!.getPlayerControlObjects()) {
-                    CrewmateServer.LOGGER.debug("Serializing ${x.javaClass.simpleName} in spawn message!")
-                    hazel.payload!!.writePackedUInt32(x.netId.toLong())
-                    val innerHazel = HazelMessage.start(0x01)
-                    x.initialState = true
-                    x.serialize(innerHazel.payload!!)
-                    x.initialState = false
-                    innerHazel.endMessage()
-                    innerHazel.copyTo(hazel.payload!!)
+                if (playerControl?.getPlayerControlObjects()!!.size >= 3) {
+                    for (x in playerControl!!.getPlayerControlObjects()) {
+                        CrewmateServer.LOGGER.debug("Serializing ${x.javaClass.simpleName} in spawn message!")
+                        hazel.payload!!.writePackedUInt32(x.netId.toLong())
+                        val innerHazel = HazelMessage.start(0x01)
+                        x.initialState = true
+                        x.serialize(innerHazel.payload!!)
+                        x.initialState = false
+                        innerHazel.endMessage()
+                        innerHazel.copyTo(hazel.payload!!)
+                    }
                 }
             } else {
                 for (x in innerNetObjects) {
@@ -56,6 +118,11 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
                         CrewmateServer.LOGGER.error("Couldn't find spawned object of {${x.simpleName}")
                         continue
                     }
+                        *//*if (obj.isGameData()) {
+                            println("sender ${sender!!.clientName}")
+                            (obj as GameData).target = sender!!.playerControl!!.playerId.toInt()
+                            obj.room = room
+                        }*//*
                     CrewmateServer.LOGGER.debug("Serializing ${x.simpleName} in spawn message!")
                     hazel.payload!!.writePackedUInt32(obj.netId.toLong())
                     val innerHazel = HazelMessage.start(0x01)
@@ -65,7 +132,7 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
                     innerHazel.endMessage()
                     innerHazel.copyTo(hazel.payload!!)
                 }
-            }
+            }*/
 
             hazel.endMessage()
             hazel.copyTo(buffer)
@@ -80,6 +147,9 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
 
 
         val innerNetObjects = GameDataUtil.getInner(spawnId.toInt())
+
+        val componentsList: ArrayList<AbstractInnerNetObject> = Lists.newArrayList()
+
         if (innerNetObjects != null) {
             for (i in 0 until components) {
                 val netId = buffer.readPackedUInt32()
@@ -95,13 +165,15 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage(0x04) {
                 if (hazel.length > 0) {
                     innerNetObject.deserialize(hazel.payload!!)
                 }
-                this.innerNetObjects.add(InnerNetObjectWrapper(ownerId, innerNetObject, spawnId.toInt()))
-
+//                this.innerNetObjects.add(InnerNetObjectWrapper(ownerId, innerNetObject, spawnId.toInt()))
+                componentsList.add(innerNetObject)
             }
+            this.innerNetObjects.add(InnerNetObjectWrapper(ownerId, componentsList, spawnId.toInt()))
+
         }
     }
 
-    class InnerNetObjectWrapper(val ownerId: Int = -2, val innerNetObject: AbstractInnerNetObject?, val spawnId: Int) {
+    class InnerNetObjectWrapper(val ownerId: Int = -2, val innerNetObjects: List<AbstractInnerNetObject>?, val spawnId: Int) {
     }
 
 }

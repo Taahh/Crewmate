@@ -3,12 +3,9 @@ package dev.taah.crewmate.backend.inner.data
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import dev.taah.crewmate.api.inner.IPlayerInfo
-import dev.taah.crewmate.api.inner.IPlayerOutfit
 import dev.taah.crewmate.api.inner.enums.PlayerOutfitType
 import dev.taah.crewmate.api.inner.enums.RoleType
-import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.util.PacketBuffer
-import kotlin.experimental.and
 
 class PlayerInfo : IPlayerInfo {
     override val outfits: HashMap<PlayerOutfitType, PlayerOutfit> = Maps.newHashMap()

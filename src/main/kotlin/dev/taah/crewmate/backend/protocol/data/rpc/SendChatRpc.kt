@@ -10,7 +10,7 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class SendChatRpc() : AbstractMessage(0x00) {
+class SendChatRpc() : AbstractMessage() {
 
     var targetNetId: Int? = null
     var chatMessage: String? = null
@@ -20,6 +20,8 @@ class SendChatRpc() : AbstractMessage(0x00) {
     }
 
     override fun processObject(room: GameRoom) {
+//        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetName(this.name!!)
+        room.broadcastReliablePacket(GameDataPacket().addMessage(RpcMessage(this.targetNetId!!, this)).gameCode(room.gameCode))
         EventManager.INSTANCE!!.callEvent(GameRoomChatEvent(room, this.chatMessage!!, room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!))
     }
 

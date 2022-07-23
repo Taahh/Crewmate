@@ -17,6 +17,8 @@ import java.util.function.Consumer
 
 class GameDataToPacket(nonce: Int = -1) : AbstractPacket<GameDataToPacket>(0x01, nonce) {
 
+    var sender: PlayerConnection? = null
+
     var target: Int = 0
     var gameCode: GameCode? = null
     var buffer: PacketBuffer? = null
@@ -27,7 +29,7 @@ class GameDataToPacket(nonce: Int = -1) : AbstractPacket<GameDataToPacket>(0x01,
         if (gameCode != null) {
             if (GameRoom.exists(gameCode!!)) {
                 var room = GameRoom.get(gameCode!!)
-                room.connections[target]!!.sendReliablePacket(packet)
+//                room.connections[target]!!.sendReliablePacket(packet)
             }
         }
     }
@@ -45,11 +47,12 @@ class GameDataToPacket(nonce: Int = -1) : AbstractPacket<GameDataToPacket>(0x01,
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+        println("GAME DATA TO")
         this.gameCode = GameCode(buffer.readInt32())
         this.target = buffer.readPackedInt32()
         this.buffer = buffer.copyPacketBuffer()
 
-        GameDataUtil.handleGameData(buffer, GameRoom.get(this.gameCode!!))
+        GameDataUtil.handleGameData(buffer, GameRoom.get(this.gameCode!!), this.target, sender = this.sender)
     }
 
     fun addMessage(message: AbstractMessage): GameDataToPacket {
@@ -61,8 +64,8 @@ class GameDataToPacket(nonce: Int = -1) : AbstractPacket<GameDataToPacket>(0x01,
         return this
     }
 
-    fun target(targetNetId: Int): GameDataToPacket {
-        this.target = targetNetId
+    fun target(targetClientId: Int): GameDataToPacket {
+        this.target = targetClientId
         return this
     }
 

@@ -2,6 +2,7 @@ package dev.taah.crewmate.backend.util.inner
 
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
+import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.backend.inner.objects.impl.*
 import dev.taah.crewmate.backend.protocol.data.DataMessage
@@ -37,31 +38,40 @@ class GameDataUtil {
             val clazz = INNER_OBJECTS[id];
             return ArrayList(clazz!!.toList())
         }
-        fun handleGameData(buffer: PacketBuffer, room: GameRoom) {
+        fun handleGameData(buffer: PacketBuffer, room: GameRoom, target: Int? = null, sender: PlayerConnection? = null) {
+
             var hazel = HazelMessage.read(buffer)
             while (hazel != null) {
                 when (hazel.getTag()) {
                     4 -> {
                         println("Game Data Spawn Message")
                         val spawnMessage = SpawnMessage(room)
+                        spawnMessage.target = target
+                        spawnMessage.sender = sender
                         spawnMessage.deserialize(hazel.payload!!)
                         spawnMessage.processObject(room)
                     }
                     1 -> {
                         println("Game Data Data Message")
                         val dataMessage = DataMessage()
+                        dataMessage.target = target
+                        dataMessage.sender = sender
                         dataMessage.deserialize(hazel.payload!!)
                         dataMessage.processObject(room)
                     }
                     2 -> {
                         println("Game Data RPC Message")
                         val rpcMessage = RpcMessage()
+                        rpcMessage.target = target
+                        rpcMessage.sender = sender
                         rpcMessage.deserialize(hazel.payload!!)
                         rpcMessage.processObject(room)
                     }
                     6 -> {
                         println("Game Data Scene Change Message")
                         val sceneChangeMessage = SceneChangeMessage()
+                        sceneChangeMessage.target = target
+                        sceneChangeMessage.sender = sender
                         sceneChangeMessage.deserialize(hazel.payload!!)
                         sceneChangeMessage.processObject(room)
                     }

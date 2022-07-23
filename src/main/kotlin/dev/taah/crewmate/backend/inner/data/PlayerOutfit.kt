@@ -5,11 +5,11 @@ import dev.taah.crewmate.util.PacketBuffer
 
 class PlayerOutfit : IPlayerOutfit {
     override var colorId: Int = 0
-    override var hatId: String = ""
-    override var petId: String = ""
-    override var skinId: String = ""
-    override var visorId: String = ""
-    override var namePlateId: String = ""
+    override var hatId: String = "missing"
+    override var petId: String = "missing"
+    override var skinId: String = "missing"
+    override var visorId: String = "missing"
+    override var namePlateId: String = "missing"
     override var preCensorName: String = ""
 
     override fun serialize(buffer: PacketBuffer) {
@@ -26,9 +26,24 @@ class PlayerOutfit : IPlayerOutfit {
         this.preCensorName = buffer.readPackedString()
         this.colorId = buffer.readPackedInt32()
         this.hatId = buffer.readPackedString()
+        if (this.hatId.isEmpty()) {
+            this.hatId = "missing"
+        }
         this.petId = buffer.readPackedString()
+        if (this.petId.isEmpty()) {
+            this.petId = "missing"
+        }
         this.skinId = buffer.readPackedString()
+        if (this.skinId.isEmpty()) {
+            this.skinId = "missing"
+        }
         this.visorId = buffer.readPackedString()
+        if (this.visorId.isEmpty()) {
+            this.visorId = "missing"
+        }
         this.namePlateId = buffer.readPackedString()
+        if (this.namePlateId.isEmpty()) {
+            this.namePlateId = "missing"
+        }
     }
 }

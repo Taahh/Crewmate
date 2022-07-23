@@ -31,6 +31,6 @@ class NormalPacket(nonce: Int) : AbstractPacket<NormalPacket>(0x00, nonce) {
         val gameCode = GameCode(hazel.payload!!.readInt32())
 //        println("game code: ${gameCode.codeString}")
 //        println("buffer: ${ByteBufUtil.prettyHexDump(hazel.payload!!)}")
-        GameDataUtil.handleGameData(hazel.payload!!, GameRoom.get(gameCode))
+//        GameDataUtil.handleGameData(hazel.payload!!, GameRoom.get(gameCode))
     }
 }

@@ -1,6 +1,5 @@
 package dev.taah.crewmate.backend.inner.data
 
-import dev.taah.crewmate.api.inner.IPlayerOutfit
 import dev.taah.crewmate.api.inner.ITaskInfo
 import dev.taah.crewmate.util.PacketBuffer
 

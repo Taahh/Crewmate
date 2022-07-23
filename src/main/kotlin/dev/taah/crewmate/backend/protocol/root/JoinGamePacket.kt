@@ -6,6 +6,7 @@ import dev.taah.crewmate.api.inner.enums.GameState
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomJoinEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.protocol.data.SpawnMessage
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
@@ -97,6 +98,11 @@ class JoinGamePacket(nonce: Int) : AbstractPacket<JoinGamePacket>(0x01, nonce) {
 
         if (room.host != id) {
             room.broadcastReliablePacket(joinGamePacket, id)
+//            val spawnMessage = SpawnMessage(room).addInnerNetObject(2).addInnerNetObject(3)
+//            for (x in room.connections.filter { entry -> entry.key != id }) {
+//                spawnMessage.addInnerNetObject(4, x.key)
+//            }
+//            room.broadcastReliablePacket(GameDataToPacket().gameCode(room.gameCode).target(id).addMessage(spawnMessage))
         }
         connection.sendReliablePacket(packet)
         EventManager.INSTANCE!!.callEvent(GameRoomJoinEvent(connection, room))

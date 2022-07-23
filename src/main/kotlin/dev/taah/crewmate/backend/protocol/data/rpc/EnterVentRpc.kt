@@ -11,7 +11,7 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class EnterVentRpc() : AbstractMessage(0x00) {
+class EnterVentRpc() : AbstractMessage() {
 
     var targetNetId: Int? = null
     var ventId: Int? = null

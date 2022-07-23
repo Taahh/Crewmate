@@ -7,30 +7,25 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class SetNameRpc() : AbstractMessage() {
+class SetNamePlateRpc() : AbstractMessage() {
 
     var targetNetId: Int? = null
-    var name: String? = null
+    var namePlateId: String? = null
 
-    constructor(name: String) : this() {
-        this.name = name
+    constructor(namePlateId: String) : this() {
+        this.namePlateId = namePlateId
     }
 
     override fun processObject(room: GameRoom) {
-        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetName(this.name!!)
+        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetNamePlate(this.namePlateId!!)
     }
 
     override fun serialize(buffer: PacketBuffer) {
-        buffer.writeByte(RpcFlags.SetName.id)
-        buffer.writePackedString(this.name!!)
+        buffer.writeByte(RpcFlags.SetNamePlate.id)
+        buffer.writePackedString(this.namePlateId!!)
     }
 
     override fun deserialize(buffer: PacketBuffer) {
-        this.name = buffer.readPackedString()
-    }
-
-    fun name(name: String): SetNameRpc {
-       this.name = name
-        return this
+        this.namePlateId = buffer.readPackedString()
     }
 }
