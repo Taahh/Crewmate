@@ -30,7 +30,7 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
                 val conn = room.getConnectionByClientId(this.ownerId)
                 CrewmateServer.LOGGER.debug("connection null? ${conn != null}")
 //                CrewmateServer.LOGGER.debug("room host has player control? ")
-                this.rpcCheckName(conn!!.clientName, room.host)
+//                this.rpcCheckName(conn!!.clientName, room.host)
             }
         }
         this.initialState = false
@@ -65,7 +65,7 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
         val room: GameRoom = checkRoom() ?: return
         val rpcMessage = RpcMessage(this.netId, rpc)
         if (targetClientId == null) {
-            room.broadcastReliablePacket(GameDataPacket(this.gameCode!!, rpcMessage))
+            room.broadcastReliablePacket(GameDataPacket(this.gameCode!!, rpcMessage), room.connections.entries.first {  it.value.uniqueId.equals(room.getConnectionByPlayerControlNetId(this.netId)!!.uniqueId) }.key)
         } else {
             room.connections[targetClientId]!!.sendReliablePacket(GameDataToPacket().gameCode(this.gameCode!!).addMessage(rpcMessage).target(targetClientId))
         }
@@ -75,28 +75,32 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
         sendRpc(SetNameRpc(name), targetClientId)
     }
 
-    fun rpcSetNamePlate(namePlateId: String, targetClientId: Int? = null) {
-        sendRpc(SetNamePlateRpc(namePlateId), targetClientId)
+    fun rpcSetNamePlateStr(namePlateId: String, targetClientId: Int? = null) {
+        sendRpc(SetNamePlateStrRpc(namePlateId), targetClientId)
     }
 
     fun rpcSetColor(bodyColor: Byte, targetClientId: Int? = null) {
         sendRpc(SetColorRpc(bodyColor), targetClientId)
     }
 
-    fun rpcSetPet(petId: String, targetClientId: Int? = null) {
-        sendRpc(SetPetRpc(petId), targetClientId)
+    fun rpcCheckColor(bodyColor: Byte, targetClientId: Int? = null) {
+        sendRpc(CheckColorRpc(bodyColor), targetClientId)
     }
 
-    fun rpcSetHat(hatId: String, targetClientId: Int? = null) {
-        sendRpc(SetHatRpc(hatId), targetClientId)
+    fun rpcSetPetStr(petId: String, targetClientId: Int? = null) {
+        sendRpc(SetPetStrRpc(petId), targetClientId)
     }
 
-    fun rpcSetSkin(hatId: String, targetClientId: Int? = null) {
-        sendRpc(SetSkinRpc(hatId), targetClientId)
+    fun rpcSetHatStr(hatId: String, targetClientId: Int? = null) {
+        sendRpc(SetHatStrRpc(hatId), targetClientId)
     }
 
-    fun rpcSetVisor(visorId: String, targetClientId: Int? = null) {
-        sendRpc(SetVisorRpc(visorId), targetClientId)
+    fun rpcSetSkinStr(hatId: String, targetClientId: Int? = null) {
+        sendRpc(SetSkinStrRpc(hatId), targetClientId)
+    }
+
+    fun rpcSetVisorStr(visorId: String, targetClientId: Int? = null) {
+        sendRpc(SetVisorStrRpc(visorId), targetClientId)
     }
 
     fun rpcSetStartCounter(num: Int, secondsLeft: Byte, targetClientId: Int? = null) {

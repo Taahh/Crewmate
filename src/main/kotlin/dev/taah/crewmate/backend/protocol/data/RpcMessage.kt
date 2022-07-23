@@ -44,7 +44,7 @@ class RpcMessage() : AbstractMessage() {
             }
             CrewmateServer.LOGGER.debug("RPC Handling: ${this.rpc!!.javaClass.simpleName}")
             this.rpc!!.deserialize(this.remainingBuffer!!)
-            this.rpc!!.processObject(room)
+//            this.rpc!!.processObject(room)
         }
     }
 

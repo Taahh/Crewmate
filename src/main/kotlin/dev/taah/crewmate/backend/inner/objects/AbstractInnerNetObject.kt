@@ -21,4 +21,8 @@ abstract class AbstractInnerNetObject : IInnerNetObject<GameRoom> {
     fun isVoteBanSystem(): Boolean {
         return this is VoteBanSystem
     }
+
+    fun isLobbyBehavior(): Boolean {
+        return this is LobbyBehavior
+    }
 }

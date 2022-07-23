@@ -4,7 +4,7 @@ import dev.taah.crewmate.backend.protocol.data.AbstractMessage
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
 
-class SetSkinRpc() : AbstractMessage() {
+class SetSkinStrRpc() : AbstractMessage() {
 
     var targetNetId: Int? = null
     var skinId: String? = null
@@ -14,11 +14,11 @@ class SetSkinRpc() : AbstractMessage() {
     }
 
     override fun processObject(room: GameRoom) {
-        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetSkin(this.skinId!!)
+        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetSkinStr(this.skinId!!)
     }
 
     override fun serialize(buffer: PacketBuffer) {
-        buffer.writeByte(RpcFlags.SetSkin.id)
+        buffer.writeByte(RpcFlags.SetSkinStr.id)
         buffer.writePackedString(this.skinId!!)
     }
 

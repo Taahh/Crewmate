@@ -25,10 +25,7 @@ class GameData(override val netId: Int, override val ownerId: Int) : AbstractInn
     override fun serialize(buffer: PacketBuffer) {
         var num = 0
         val players = this.players.values.toList()
-        for (i in 0 until players.size) {
-            if (room != null && target != null && target!! == room!!.connections.entries.first { it.value.uniqueId.equals(room!!.getConnectionByPlayerId(players[i].playerId)!!.uniqueId) }.key) {
-                continue
-            }
+        for (i in players.indices) {
             println("dirty bit for ${players[i].playerId}? ${this.isDirtyBitSet(players[i].playerId.toInt())}")
             /*if (this.initialState || this.isDirtyBitSet(players[i].playerId.toInt())) {
                 if (!this.initialState) {

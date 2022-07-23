@@ -14,7 +14,7 @@ class CheckNameRpc() : AbstractMessage() {
     }
 
     override fun processObject(room: GameRoom) {
-        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetName(this.name!!)
+        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcCheckName(this.name!!, room.host)
     }
 
     override fun serialize(buffer: PacketBuffer) {

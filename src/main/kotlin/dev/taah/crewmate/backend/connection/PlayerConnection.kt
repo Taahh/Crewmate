@@ -41,6 +41,7 @@ class PlayerConnection(
     override var gameCode: GameCode? = null
     override var playerInfo: PlayerInfo? = null
     var playerControl: PlayerControl? = null
+    var spawning: Boolean = true
 
     companion object {
         val CONNECTION_STRING: AttributeKey<PlayerConnection> = AttributeKey.newInstance("player_conn")
