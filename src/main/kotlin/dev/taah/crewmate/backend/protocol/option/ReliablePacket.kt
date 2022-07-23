@@ -40,6 +40,7 @@ open class ReliablePacket(nonce: Int) :
         registerPacket(0x00, HostGamePacket::class as KClass<AbstractPacket<*>>)
         registerPacket(0x01, JoinGamePacket::class as KClass<AbstractPacket<*>>)
         registerPacket(0x02, StartGamePacket::class as KClass<AbstractPacket<*>>)
+        registerPacket(0x04, RemovePlayerPacket::class as KClass<AbstractPacket<*>>)
         registerPacket(0x05, GameDataPacket::class as KClass<AbstractPacket<*>>)
         registerPacket(0x06, GameDataToPacket::class as KClass<AbstractPacket<*>>)
         registerPacket(0x07, JoinedGamePacket::class as KClass<AbstractPacket<*>>)

@@ -5,6 +5,7 @@ import dev.taah.crewmate.api.inner.enums.DisconnectReasons
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomLeaveEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket
+import dev.taah.crewmate.backend.protocol.root.RemovePlayerPacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
@@ -26,6 +27,12 @@ class DisconnectPacket(nonce: Int) : AbstractPacket<DisconnectPacket>(0x09, nonc
                 if (room.connections.isEmpty()) {
                     CrewmateServer.LOGGER.info("Destroying room ${connection.gameCode!!.codeString}")
                     GameRoom.ROOMS.remove(GameRoom.ROOMS.entries.first { entry -> entry.key.equals(connection.gameCode!!) }.key)
+                } else {
+                    room.broadcastReliablePacket(RemovePlayerPacket(
+                        room.gameCode,
+                        player.key,
+                        this.disconnectReasons
+                    ))
                 }
                 connection.gameCode = null
             }
