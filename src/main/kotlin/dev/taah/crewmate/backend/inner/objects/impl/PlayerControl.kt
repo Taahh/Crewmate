@@ -8,6 +8,7 @@ import dev.taah.crewmate.backend.protocol.root.GameDataPacket
 import dev.taah.crewmate.backend.protocol.root.GameDataToPacket
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
+import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 import dev.taah.crewmate.util.inner.GameCode
 
@@ -44,7 +45,8 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
         buffer.writeByte(this.playerId.toInt())
     }
 
-    override fun deserialize(buffer: PacketBuffer) {
+    override fun deserialize(hazelMessage: HazelMessage) {
+        val buffer = hazelMessage.payload!!
         if (this.initialState) {
             this.new = buffer.readBoolean()
         }
@@ -63,6 +65,7 @@ class PlayerControl(override val netId: Int, override val ownerId: Int) : Abstra
 
     fun sendRpc(rpc: AbstractMessage, targetClientId: Int? = null) {
         val room: GameRoom = checkRoom() ?: return
+        room.gameData!!.DIRTY_BITS.add(this.playerId)
         val rpcMessage = RpcMessage(this.netId, rpc)
         if (targetClientId == null) {
             room.broadcastReliablePacket(GameDataPacket(this.gameCode!!, rpcMessage), room.connections.entries.first {  it.value.uniqueId.equals(room.getConnectionByPlayerControlNetId(this.netId)!!.uniqueId) }.key)

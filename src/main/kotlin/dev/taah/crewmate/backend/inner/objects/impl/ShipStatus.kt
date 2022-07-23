@@ -4,6 +4,7 @@ import dev.taah.crewmate.backend.inner.objects.AbstractInnerNetObject
 import dev.taah.crewmate.backend.util.Vector2
 import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
+import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
 
 class ShipStatus(override val netId: Int, override val ownerId: Int) : AbstractInnerNetObject() {
@@ -19,7 +20,7 @@ class ShipStatus(override val netId: Int, override val ownerId: Int) : AbstractI
         TODO("Not yet implemented")
     }
 
-    override fun deserialize(buffer: PacketBuffer) {
+    override fun deserialize(hazelMessage: HazelMessage) {
 
     }
 }

@@ -12,6 +12,8 @@ class SceneChangeMessage : AbstractMessage() {
     var clientId: Int = 0
     var targetScene: String? = null
 
+    var buffer: PacketBuffer? = null
+
     override fun processObject(room: GameRoom) {
         if (this.target != null) {
             CrewmateServer.LOGGER.debug("TARGET WAS NOT NULL, SENDING GAME DATA TO FOR SCENE CHANGE")
@@ -37,13 +39,18 @@ class SceneChangeMessage : AbstractMessage() {
 
     override fun serialize(buffer: PacketBuffer) {
         val hazel = HazelMessage.start(0x06)
-        hazel.payload!!.writePackedInt32(this.clientId)
-        hazel.payload!!.writePackedString(this.targetScene!!)
+        if (this.buffer != null) {
+            hazel.payload!!.writeBytes(this.buffer!!)
+        } else {
+            hazel.payload!!.writePackedInt32(this.clientId)
+            hazel.payload!!.writePackedString(this.targetScene!!)
+        }
         hazel.endMessage()
         hazel.copyTo(buffer)
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+//        this.buffer = buffer.copyPacketBuffer()
         this.clientId = buffer.readPackedInt32()
         this.targetScene = buffer.readPackedString()
         println("Target $clientId changing to $targetScene")

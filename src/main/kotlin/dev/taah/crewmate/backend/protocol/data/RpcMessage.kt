@@ -27,6 +27,7 @@ class RpcMessage() : AbstractMessage() {
 
     private var remainingBuffer: PacketBuffer? = null
     private var rpc: AbstractMessage? = null
+    private var buffer: PacketBuffer? = null
     var targetNetId: Int = 0
 
     constructor(targetNetId: Int, rpc: AbstractMessage) : this() {
@@ -44,19 +45,25 @@ class RpcMessage() : AbstractMessage() {
             }
             CrewmateServer.LOGGER.debug("RPC Handling: ${this.rpc!!.javaClass.simpleName}")
             this.rpc!!.deserialize(this.remainingBuffer!!)
-//            this.rpc!!.processObject(room)
+            this.rpc!!.processObject(room)
         }
     }
 
     override fun serialize(buffer: PacketBuffer) {
+        println("serializing ${rpc!!.javaClass.simpleName} rpc")
         val hazel = HazelMessage.start(0x02)
-        hazel.payload!!.writePackedUInt32(this.targetNetId.toLong())
-        rpc!!.serialize(hazel.payload!!)
+        if (this.buffer != null) {
+            hazel.payload!!.writeBytes(this.buffer!!)
+        } else {
+            hazel.payload!!.writePackedUInt32(this.targetNetId.toLong())
+            rpc!!.serialize(hazel.payload!!)
+        }
         hazel.endMessage()
         hazel.copyTo(buffer)
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+        this.buffer = buffer.copyPacketBuffer()
         this.targetNetId = buffer.readPackedUInt32().toInt()
         val callId = buffer.readUnsignedByte().toInt()
         var unknown = true

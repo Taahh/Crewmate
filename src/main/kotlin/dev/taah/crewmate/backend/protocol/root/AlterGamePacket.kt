@@ -2,6 +2,7 @@ package dev.taah.crewmate.backend.protocol.root
 
 import dev.taah.crewmate.api.event.EventManager
 import dev.taah.crewmate.api.inner.enums.GameVisibility
+import dev.taah.crewmate.api.inner.enums.PlayerOutfitType
 import dev.taah.crewmate.backend.connection.PlayerConnection
 import dev.taah.crewmate.backend.event.room.GameRoomVisibilityUpdateEvent
 import dev.taah.crewmate.backend.protocol.AbstractPacket

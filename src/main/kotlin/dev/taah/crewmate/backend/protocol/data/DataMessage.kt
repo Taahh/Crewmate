@@ -10,12 +10,14 @@ import dev.taah.crewmate.core.CrewmateServer
 import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.HazelMessage
 import dev.taah.crewmate.util.PacketBuffer
+import io.netty.buffer.ByteBufUtil
 
 class DataMessage() : AbstractMessage() {
 
     private var innerNetObject: AbstractInnerNetObject? = null
 
-    var buffer: PacketBuffer? = null
+    var actualBuffer: PacketBuffer? = null
+    var buffer: HazelMessage? = null
     var netId: Int = 0
 
 
@@ -56,10 +58,6 @@ class DataMessage() : AbstractMessage() {
         if (this.innerNetObject != null) {
             if (this.target != null) {
                 CrewmateServer.LOGGER.debug("TARGET WAS NOT NULL, SENDING GAME DATA TO FOR DATA")
-                if (this.innerNetObject!!.isGameData()) {
-                    (this.innerNetObject!! as GameData).room = room
-                    (this.innerNetObject!! as GameData).target = room.connections[this.target!!]!!.playerControl!!.playerId.toInt()
-                }
                 room.connections[this.target]?.sendReliablePacket(GameDataToPacket().target(this.target!!).gameCode(room.gameCode).addMessage(/*DataMessage(getByNetId(room, this.innerNetObject!!.netId)!!)*/this))
             } else {
                 CrewmateServer.LOGGER.debug("SENDING GAME DATA PAKCET FOR DATA")
@@ -77,17 +75,29 @@ class DataMessage() : AbstractMessage() {
     }
 
     override fun serialize(buffer: PacketBuffer) {
+        println("serializing data")
         val hazel = HazelMessage.start(0x01)
-        hazel.payload!!.writePackedUInt32(this.innerNetObject!!.netId.toLong())
-        println("serializing ${this.innerNetObject!!.javaClass.simpleName} for data")
-        this.innerNetObject!!.serialize(hazel.payload!!)
+        if (this.actualBuffer != null) {
+            hazel.payload!!.writeBytes(this.actualBuffer!!)
+        } else {
+            hazel.payload!!.writePackedUInt32(this.innerNetObject!!.netId.toLong())
+            println("serializing ${this.innerNetObject!!.javaClass.simpleName} for data")
+            this.innerNetObject!!.initialState = false
+            this.innerNetObject!!.serialize(hazel.payload!!)
+        }
         hazel.endMessage()
         hazel.copyTo(buffer)
+        println("actual buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+//        this.actualBuffer = buffer.copyPacketBuffer()
         this.netId = buffer.readPackedUInt32().toInt()
-        this.buffer = buffer
+        val hazel = HazelMessage()
+        hazel.length = buffer.readableBytes()
+        hazel.payload = buffer
+        this.buffer = hazel
+
     }
 
     fun getByNetId(room: GameRoom, netId: Int): AbstractInnerNetObject? {

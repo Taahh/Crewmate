@@ -5,18 +5,22 @@ import com.google.common.collect.Maps
 import dev.taah.crewmate.api.inner.IPlayerInfo
 import dev.taah.crewmate.api.inner.enums.PlayerOutfitType
 import dev.taah.crewmate.api.inner.enums.RoleType
+import dev.taah.crewmate.core.room.GameRoom
 import dev.taah.crewmate.util.PacketBuffer
+import dev.taah.crewmate.util.inner.GameCode
 
 class PlayerInfo : IPlayerInfo {
     override val outfits: HashMap<PlayerOutfitType, PlayerOutfit> = Maps.newHashMap()
     override var playerId: Byte = 0
     override var tasks: ArrayList<TaskInfo> = Lists.newArrayList()
-    override var level: Int = 0
+    override var level: Int = UInt.MAX_VALUE.toInt()
     override var disconnected: Boolean = false
     override var dead: Boolean = false
     override var roleType: RoleType = RoleType.Crewmate
     override var friendCode: String = ""
     override var puid: String = ""
+
+    var gameCode: GameCode? = null
 
     override fun serialize(buffer: PacketBuffer) {
         buffer.writeByte(this.outfits.size)
@@ -49,6 +53,11 @@ class PlayerInfo : IPlayerInfo {
             val outfit = PlayerOutfit()
             outfit.deserialize(buffer)
 //            println("outfit: ${CrewmateServer.GSON.toJson(outfit)}")
+            if (this.outfits.containsKey(type!!)) {
+                if (gameCode != null && !this.outfits[type]!!.equals(outfit)) {
+                    GameRoom.get(gameCode!!).gameData?.DIRTY_BITS!!.add(this.playerId)
+                }
+            }
             this.outfits[type!!] = outfit
         }
         this.level = buffer.readPackedUInt32().toInt()

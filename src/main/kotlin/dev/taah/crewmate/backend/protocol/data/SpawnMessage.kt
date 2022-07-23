@@ -85,69 +85,41 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage() {
     }
 
     override fun serialize(buffer: PacketBuffer) {
-        this.innerNetObjects.forEach {
+        if (this.buffer != null) {
             val hazel = HazelMessage.start(0x04)
-            hazel.payload!!.writePackedUInt32(it.spawnId.toLong())
-            hazel.payload!!.writePackedInt32(it.ownerId)
-            hazel.payload!!.writeByte(if (it.spawnId == 4) 1 else 0)
-
-            val innerNetObjects = GameDataUtil.getInner(it.spawnId) ?: throw RuntimeException("Inner Net Object with spawn Id ${it.spawnId} was not registered!")
-
-            hazel.payload!!.writePackedInt32(innerNetObjects!!.size)
-            for (obj in it.innerNetObjects!!) {
-                hazel.payload!!.writePackedUInt32(obj.netId.toLong())
-                val hazelInner = HazelMessage.start(0x01)
-                obj.initialState = true
-                CrewmateServer.LOGGER.debug("serializing ${obj.javaClass.simpleName} with owner id ${obj.ownerId} and net id ${obj.netId} and spawn id ${it.spawnId}")
-                obj.serialize(hazelInner.payload!!)
-                obj.initialState = false
-                hazelInner.endMessage()
-                hazelInner.copyTo(hazel.payload!!)
-            }
-            /*if (it.spawnId == 4) {
-                CrewmateServer.LOGGER.debug("SERIALIZING OWNER ID'S PLAYER STUFF ${it.ownerId}")
-                val playerControl = room.getConnectionByClientId(it.ownerId)
-                if (playerControl?.getPlayerControlObjects()!!.size >= 3) {
-                    for (x in playerControl!!.getPlayerControlObjects()) {
-                        CrewmateServer.LOGGER.debug("Serializing ${x.javaClass.simpleName} in spawn message!")
-                        hazel.payload!!.writePackedUInt32(x.netId.toLong())
-                        val innerHazel = HazelMessage.start(0x01)
-                        x.initialState = true
-                        x.serialize(innerHazel.payload!!)
-                        x.initialState = false
-                        innerHazel.endMessage()
-                        innerHazel.copyTo(hazel.payload!!)
-                    }
-                }
-            } else {
-                for (x in innerNetObjects) {
-                    val obj = room.spawnedObjects.values.find { x.simpleName == it.javaClass.simpleName }
-                    if (obj == null) {
-                        CrewmateServer.LOGGER.error("Couldn't find spawned object of {${x.simpleName}")
-                        continue
-                    }
-                        *//*if (obj.isGameData()) {
-                            println("sender ${sender!!.clientName}")
-                            (obj as GameData).target = sender!!.playerControl!!.playerId.toInt()
-                            obj.room = room
-                        }*//*
-                    CrewmateServer.LOGGER.debug("Serializing ${x.simpleName} in spawn message!")
-                    hazel.payload!!.writePackedUInt32(obj.netId.toLong())
-                    val innerHazel = HazelMessage.start(0x01)
-                    obj.initialState = true
-                    obj.serialize(innerHazel.payload!!)
-                    obj.initialState = false
-                    innerHazel.endMessage()
-                    innerHazel.copyTo(hazel.payload!!)
-                }
-            }*/
-
+            hazel.payload!!.writeBytes(this.buffer!!)
             hazel.endMessage()
             hazel.copyTo(buffer)
+        } else {
+            this.innerNetObjects.forEach {
+                val hazel = HazelMessage.start(0x04)
+                hazel.payload!!.writePackedUInt32(it.spawnId.toLong())
+                hazel.payload!!.writePackedInt32(it.ownerId)
+                hazel.payload!!.writeByte(if (it.spawnId == 4) 1 else 0)
+
+                val innerNetObjects = GameDataUtil.getInner(it.spawnId) ?: throw RuntimeException("Inner Net Object with spawn Id ${it.spawnId} was not registered!")
+
+                hazel.payload!!.writePackedInt32(innerNetObjects!!.size)
+                for (obj in it.innerNetObjects!!) {
+                    hazel.payload!!.writePackedUInt32(obj.netId.toLong())
+                    val hazelInner = HazelMessage.start(0x01)
+                    obj.initialState = true
+                    CrewmateServer.LOGGER.debug("serializing ${obj.javaClass.simpleName} with owner id ${obj.ownerId} and net id ${obj.netId} and spawn id ${it.spawnId}")
+                    obj.serialize(hazelInner.payload!!)
+                    obj.initialState = false
+                    hazelInner.endMessage()
+                    hazelInner.copyTo(hazel.payload!!)
+                }
+
+                hazel.endMessage()
+                hazel.copyTo(buffer)
+            }
         }
+
     }
 
     override fun deserialize(buffer: PacketBuffer) {
+//        this.buffer = buffer.copyPacketBuffer()
         val spawnId = buffer.readPackedUInt32()
         val ownerId = buffer.readPackedInt32()
         val flags = buffer.readByte()
@@ -170,7 +142,7 @@ class SpawnMessage(val room: GameRoom) : AbstractMessage() {
                 innerNetObject.initialState = true
                 CrewmateServer.LOGGER.debug("Spawning ${innerNetObject.javaClass.simpleName} with owner ID $ownerId")
                 if (hazel.length > 0) {
-                    innerNetObject.deserialize(hazel.payload!!)
+                    innerNetObject.deserialize(hazel)
                 }
 //                this.innerNetObjects.add(InnerNetObjectWrapper(ownerId, innerNetObject, spawnId.toInt()))
                 componentsList.add(innerNetObject)

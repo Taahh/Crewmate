@@ -84,7 +84,7 @@ class PlayerConnection(
             "Sending packet to ${this.clientName}: ${if (packet is ReliablePacket) packet.reliablePacket!!.javaClass.simpleName else packet.javaClass.simpleName}"
         )
         if (packet is GameDataToPacket || packet is GameDataPacket) {
-            CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.hexDump(buffer)}")
+            CrewmateServer.LOGGER!!.debug("Buffer: ${ByteBufUtil.prettyHexDump(buffer)}")
         }
     }
 

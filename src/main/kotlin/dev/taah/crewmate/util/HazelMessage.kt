@@ -7,7 +7,6 @@ import lombok.Setter
 @Setter
 class HazelMessage {
     var length = 0
-        private set
     private var tag = 0
 
     var payload: PacketBuffer? = null

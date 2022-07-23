@@ -21,7 +21,7 @@ class SendChatRpc() : AbstractMessage() {
 
     override fun processObject(room: GameRoom) {
 //        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl!!.rpcSetName(this.name!!)
-        room.broadcastReliablePacket(GameDataPacket().addMessage(RpcMessage(this.targetNetId!!, this)).gameCode(room.gameCode))
+        room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!.playerControl?.rpcSendChat(this.chatMessage!!)
         EventManager.INSTANCE!!.callEvent(GameRoomChatEvent(room, this.chatMessage!!, room.getConnectionByPlayerControlNetId(this.targetNetId!!)!!))
     }
 
